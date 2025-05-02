@@ -11,22 +11,7 @@ export const prisma = new PrismaClient();
 const app = express();
 
 const corsOptions = {
-  origin: function(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-    // Allow requests with no origin (like mobile apps, curl requests)
-    if (!origin) return callback(null, true);
-    
-    // Check if origin is allowed
-    const allowedOrigins = [process.env.CLIENT_URL];
-    if (process.env.NODE_ENV !== 'production') {
-      allowedOrigins.push(process.env.CLIENT_URL || "https://nerdc-journals-ashy.vercel.app");
-    }
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: process.env.CLIENT_URL || "http://localhost:3000", // Add your client URLs here
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "Cookie"],

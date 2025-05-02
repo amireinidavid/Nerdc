@@ -2,22 +2,18 @@
   "version": 2,
   "builds": [
     {
-      "src": "dist/server.js",
-      "use": "@vercel/node"
+      "src": "server.ts",
+      "use": "@vercel/node",
+      "config": {
+        "installCommand": "npm install --legacy-peer-deps && npx prisma generate",
+        "buildCommand": "prisma generate && tsc"
+      }
     }
   ],
   "routes": [
     {
-      "src": "/uploads/(.*)",
-      "dest": "/dist/uploads/$1"
-    },
-    {
       "src": "/(.*)",
-      "dest": "dist/server.js"
+      "dest": "server.ts"
     }
-  ],
-  "installCommand": "npm install --legacy-peer-deps",
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 } 

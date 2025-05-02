@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "dist/server.ts",
+      "src": "server.ts",
       "use": "@vercel/node",
       "config": {
         "installCommand": "npm install --legacy-peer-deps && npx prisma generate",
@@ -13,7 +13,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "dist/server.ts"
+      "dest": "server.ts"
     }
   ]
 } 

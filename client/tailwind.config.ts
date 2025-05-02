@@ -10,7 +10,15 @@ module.exports = {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: {
+        DEFAULT: "1rem",
+        xs: "1.25rem",
+        sm: "1.5rem",
+        md: "2rem",
+        lg: "2rem",
+        xl: "2rem",
+        "2xl": "2rem",
+      },
       screens: {
         "2xl": "1400px",
       },
@@ -77,6 +85,20 @@ module.exports = {
         gradient: {
           start: "var(--gradient-start)",
           end: "var(--gradient-end)",
+        },
+        // Fixed green color palette for direct access
+        emerald: {
+          50: '#ecfdf5',
+          100: '#d1fae5',
+          200: '#a7f3d0',
+          300: '#6ee7b7',
+          400: '#34d399',
+          500: '#10b981',
+          600: '#059669',
+          700: '#047857',
+          800: '#065f46',
+          900: '#064e3b',
+          950: '#022c22',
         },
       },
       borderRadius: {
@@ -154,6 +176,21 @@ module.exports = {
         'dots-pattern': 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.03\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3Ccircle cx=\'13\' cy=\'13\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")',
         'glass-gradient': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
         'glass-shine': 'linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 40%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 60%, rgba(255,255,255,0) 100%)',
+      },
+      spacing: {
+        'safe-top': 'env(safe-area-inset-top, 1rem)',
+        'safe-bottom': 'env(safe-area-inset-bottom, 1.5rem)',
+        'mobile-edge': '1.25rem',
+      },
+      padding: {
+        'screen-x': '1.5rem',
+        'screen-y': '2rem',
+        'header-y': '1.25rem',
+        'footer-y': '1.5rem',
+      },
+      margin: {
+        'screen-x': '1.5rem',
+        'screen-y': '2rem',
       },
     },
   },

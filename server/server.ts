@@ -11,7 +11,7 @@ export const prisma = new PrismaClient();
 const app = express();
 
 const corsOptions = {
-  origin: process.env.CLIENT_URL || "http://localhost:3000", // Add your client URLs here
+  origin: process.env.CLIENT_URL || "https://nerdc-journal-ashy.vercel.app", // Add your client URLs here
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "Cookie"],

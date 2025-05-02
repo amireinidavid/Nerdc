@@ -1,0 +1,278 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  AUTHOR
+  ADMIN
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  PENDING
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum ReviewStatus {
+  DRAFT
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  PUBLISHED
+}
+
+enum ProfileStatus {
+  INCOMPLETE
+  COMPLETE
+}
+
+model User {
+  id                 Int           @id @default(autoincrement())
+  email              String        @unique
+  password           String
+  name               String?
+  role               UserRole      @default(USER)
+  profileStatus      ProfileStatus @default(INCOMPLETE)
+  
+  // Basic profile fields
+  profileImage       String?
+  bio                String?       @db.Text
+  phone              String?
+  address            String?
+  city               String?
+  state              String?
+  country            String?
+  postalCode         String?
+  
+  // Researcher-specific fields
+  institution        String?
+  department         String?
+  position           String?
+  researchInterests  String?       @db.Text
+  academicDegrees    String?       @db.Text
+  orcidId            String?       // ORCID is a researcher identifier
+  googleScholarId    String?
+  researchGateUrl    String?
+  publicationsCount  Int?
+  citationsCount     Int?
+  hIndex             Int?
+  
+  // Social & contact
+  website            String?
+  linkedinUrl        String?
+  twitterHandle      String?
+
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  // Relations
+  subscriptions      Subscription[]
+  authoredJournals   Journal[]     @relation("JournalAuthor")
+  reviewedJournals   Journal[]     @relation("JournalReviewer")
+  payments           Payment[]
+  downloads          Download[]
+  comments           Comment[]
+  savedJournals      SavedJournal[]
+}
+
+model Subscription {
+  id             Int               @id @default(autoincrement())
+  userId         Int
+  planId         Int
+  status         SubscriptionStatus @default(PENDING)
+  startDate      DateTime          @default(now())
+  endDate        DateTime
+  autoRenew      Boolean           @default(false)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  // Relations
+  user           User              @relation(fields: [userId], references: [id])
+  plan           SubscriptionPlan  @relation(fields: [planId], references: [id])
+  payments       Payment[]
+
+  @@index([userId])
+  @@index([planId])
+}
+
+model SubscriptionPlan {
+  id             Int            @id @default(autoincrement())
+  name           String
+  description    String         @db.Text
+  price          Decimal        @db.Decimal(10, 2)
+  duration       Int            // Duration in days
+  features       String         @db.Text
+  isActive       Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Relations
+  subscriptions  Subscription[]
+}
+
+model Payment {
+  id             Int           @id @default(autoincrement())
+  userId         Int
+  subscriptionId Int?
+  amount         Decimal       @db.Decimal(10, 2)
+  currency       String        @default("USD")
+  status         PaymentStatus @default(PENDING)
+  paymentMethod  String
+  transactionId  String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  user           User          @relation(fields: [userId], references: [id])
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  @@index([userId])
+  @@index([subscriptionId])
+}
+
+model Category {
+  id             Int            @id @default(autoincrement())
+  name           String         @unique
+  description    String?        @db.Text
+  parentId       Int?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Relations
+  parent         Category?      @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children       Category[]     @relation("CategoryHierarchy")
+  journals       Journal[]
+
+  @@index([parentId])
+}
+
+model Journal {
+  id             Int            @id @default(autoincrement())
+  title          String
+  abstract       String         @db.Text
+  content        String?        @db.Text
+  pdfUrl         String
+  thumbnailUrl   String?
+  publicationDate DateTime
+  doi            String?        @unique // Digital Object Identifier
+  isPublished    Boolean        @default(false)
+  reviewStatus   ReviewStatus   @default(DRAFT)
+  reviewerId     Int?
+  reviewNotes    String?        @db.Text
+  reviewDate     DateTime?
+  viewCount      Int            @default(0)
+  pageCount      Int?
+  price          Decimal?       @db.Decimal(10, 2)
+  authorId       Int
+  categoryId     Int
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Relations
+  author         User           @relation("JournalAuthor", fields: [authorId], references: [id])
+  reviewer       User?          @relation("JournalReviewer", fields: [reviewerId], references: [id])
+  category       Category       @relation(fields: [categoryId], references: [id])
+  tags           TagsOnJournals[]
+  downloads      Download[]
+  comments       Comment[]
+  savedBy        SavedJournal[]
+
+  @@index([authorId])
+  @@index([reviewerId])
+  @@index([categoryId])
+}
+
+model Tag {
+  id             Int            @id @default(autoincrement())
+  name           String         @unique
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Relations
+  journals       TagsOnJournals[]
+}
+
+model TagsOnJournals {
+  journalId      Int
+  tagId          Int
+  assignedAt     DateTime       @default(now())
+
+  // Relations
+  journal        Journal        @relation(fields: [journalId], references: [id])
+  tag            Tag            @relation(fields: [tagId], references: [id])
+
+  @@id([journalId, tagId])
+  @@index([journalId])
+  @@index([tagId])
+}
+
+model Download {
+  id             Int            @id @default(autoincrement())
+  userId         Int
+  journalId      Int
+  downloadDate   DateTime       @default(now())
+  ipAddress      String?
+
+  // Relations
+  user           User           @relation(fields: [userId], references: [id])
+  journal        Journal        @relation(fields: [journalId], references: [id])
+
+  @@index([userId])
+  @@index([journalId])
+}
+
+model Comment {
+  id             Int            @id @default(autoincrement())
+  content        String         @db.Text
+  userId         Int
+  journalId      Int
+  parentId       Int?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Relations
+  user           User           @relation(fields: [userId], references: [id])
+  journal        Journal        @relation(fields: [journalId], references: [id])
+  parent         Comment?       @relation("CommentReplies", fields: [parentId], references: [id])
+  replies        Comment[]      @relation("CommentReplies")
+
+  @@index([userId])
+  @@index([journalId])
+  @@index([parentId])
+}
+
+model SavedJournal {
+  id             Int            @id @default(autoincrement())
+  userId         Int
+  journalId      Int
+  savedAt        DateTime       @default(now())
+
+  // Relations
+  user           User           @relation(fields: [userId], references: [id])
+  journal        Journal        @relation(fields: [journalId], references: [id])
+
+  @@unique([userId, journalId])
+  @@index([userId])
+  @@index([journalId])
+}

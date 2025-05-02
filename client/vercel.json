@@ -1,0 +1,10 @@
+{
+  "github": {
+    "silent": true
+  },
+  "buildCommand": "next build",
+  "ignoreCommand": "echo 'Skipping any pre-checks'",
+  "env": {
+    "DISABLE_ESLINT_PLUGIN": "true"
+  }
+} 

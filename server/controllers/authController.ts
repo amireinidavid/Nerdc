@@ -19,8 +19,8 @@ const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || "localhost";
 const cookieConfig: CookieOptions = {
   httpOnly: true,
   secure: NODE_ENV === "production",
-  sameSite: NODE_ENV === "production" ? "strict" : "lax",
-  domain: COOKIE_DOMAIN,
+  sameSite: NODE_ENV === "production" ? "none" : "lax",
+  domain: NODE_ENV === "production" ? undefined : COOKIE_DOMAIN,
   path: "/",
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
 };

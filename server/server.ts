@@ -18,7 +18,7 @@ const corsOptions = {
     // Check if origin is allowed
     const allowedOrigins = [process.env.CLIENT_URL];
     if (process.env.NODE_ENV !== 'production') {
-      allowedOrigins.push(process.env.CLIENT_URL || "https://nerdc-journals-ashy.vercel.app");
+      allowedOrigins.push(process.env.CLIENT_URL || "https://nerdc-journals.vercel.app");
     }
     
     if (allowedOrigins.indexOf(origin) !== -1) {

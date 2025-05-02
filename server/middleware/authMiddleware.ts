@@ -165,13 +165,16 @@ export const authenticateUser = async (
   next: NextFunction
 ) => {
   try {
-    // Get token from cookies or authorization header
+    // Get token from cookies, authorization header, or custom headers
+    // This allows for both browser cookie auth and fallback header-based auth for Vercel
     const token = req.cookies.accessToken || 
+      req.headers["access-token"] as string ||
       (req.headers.authorization?.startsWith("Bearer") 
         ? req.headers.authorization.split(" ")[1] 
         : null);
 
     if (!token) {
+      console.log("No token found in request");
       res.status(401).json({
         success: false,
         message: "Access denied. No token provided."
@@ -179,11 +182,14 @@ export const authenticateUser = async (
       return;
     }
 
+    console.log("Token found, verifying...");
+
     // Verify token
     const decoded = jwt.verify(token, JWT_ACCESS_SECRET) as any;
 
     // Check token type
     if (decoded.tokenType !== "access") {
+      console.log("Invalid token type:", decoded.tokenType);
       res.status(401).json({
         success: false,
         message: "Invalid token type"
@@ -197,12 +203,15 @@ export const authenticateUser = async (
     });
 
     if (!user) {
+      console.log("User not found for ID:", decoded.id);
       res.status(401).json({
         success: false,
         message: "User not found"
       });
       return;
     }
+
+    console.log("User authenticated:", user.id);
 
     // Add user to request object
     req.user = {

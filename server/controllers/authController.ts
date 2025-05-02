@@ -52,12 +52,25 @@ const generateTokens = (userId: number, role: UserRole) => {
 
 // Helper function to set auth cookies
 const setAuthCookies = (res: Response, accessToken: string, refreshToken: string) => {
+  console.log("Setting cookies with config:", {
+    environment: NODE_ENV,
+    secure: NODE_ENV === "production",
+    sameSite: NODE_ENV === "production" ? "none" : "lax"
+  });
+  
+  // Set cookies with proper configuration
   res.cookie("accessToken", accessToken, cookieConfig);
   res.cookie("refreshToken", refreshToken, {
     ...cookieConfig,
     // Refresh token has longer expiry
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
+  
+  // For Vercel serverless functions, also include tokens in response headers
+  if (NODE_ENV === "production") {
+    res.setHeader("Access-Token", accessToken);
+    res.setHeader("Refresh-Token", refreshToken);
+  }
 };
 
 // Helper function to clear auth cookies

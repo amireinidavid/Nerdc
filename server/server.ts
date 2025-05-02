@@ -38,6 +38,24 @@ app.use(express.json());
 app.use(cors(corsOptions));
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
+// Debug middleware for cookies
+app.use((req, res, next) => {
+  console.log(`Request cookies: ${JSON.stringify(req.cookies)}`);
+  
+  // Store the original setHeader method
+  const originalSetHeader = res.setHeader;
+  
+  // Override setHeader method to log cookie settings
+  res.setHeader = function(name, value) {
+    if (name === 'Set-Cookie') {
+      console.log(`Setting cookie: ${value}`);
+    }
+    return originalSetHeader.apply(this, [name, value] as any);
+  };
+  
+  next();
+});
+
 // Root route for health check
 app.get("/", (req, res) => {
   res.status(200).json({

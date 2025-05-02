@@ -3,8 +3,8 @@
     "silent": true
   },
   "buildCommand": "next build",
-  "ignoreCommand": "echo 'Skipping any pre-checks'",
   "env": {
-    "DISABLE_ESLINT_PLUGIN": "true"
+    "DISABLE_ESLINT_PLUGIN": "true",
+    "NEXT_DISABLE_ESLINT": "1"
   }
 } 

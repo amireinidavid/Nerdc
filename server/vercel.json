@@ -5,8 +5,8 @@
       "src": "server.ts",
       "use": "@vercel/node",
       "config": {
-        "installCommand": "npm install --legacy-peer-deps && npx prisma generate",
-        "buildCommand": "prisma generate && tsc"
+        "installCommand": "npm install --force && npx prisma generate",
+        "buildCommand": "npx prisma generate && tsc"
       }
     }
   ],

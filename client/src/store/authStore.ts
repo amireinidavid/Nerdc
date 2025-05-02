@@ -83,6 +83,18 @@ const useAuthStore = create<AuthState>()(
           const response = await authAPI.login(email, password);
           const userData = response.data.data.user;
           
+          // Check for tokens in headers (for Vercel production environment)
+          const accessToken = response.headers?.["access-token"];
+          const refreshToken = response.headers?.["refresh-token"];
+          
+          // Store tokens in localStorage if they were sent in headers
+          if (accessToken) {
+            localStorage.setItem('accessToken', accessToken);
+            if (refreshToken) {
+              localStorage.setItem('refreshToken', refreshToken);
+            }
+          }
+          
           set({ 
             user: userData,
             isAuthenticated: true,
@@ -111,6 +123,18 @@ const useAuthStore = create<AuthState>()(
           const newUser = response.data.data.user;
           const requiresCompletion = response.data.data.requiresProfileCompletion;
           
+          // Check for tokens in headers (for Vercel production environment)
+          const accessToken = response.headers?.["access-token"];
+          const refreshToken = response.headers?.["refresh-token"];
+          
+          // Store tokens in localStorage if they were sent in headers
+          if (accessToken) {
+            localStorage.setItem('accessToken', accessToken);
+            if (refreshToken) {
+              localStorage.setItem('refreshToken', refreshToken);
+            }
+          }
+          
           set({ 
             user: newUser,
             isAuthenticated: true,
@@ -136,6 +160,10 @@ const useAuthStore = create<AuthState>()(
           
           await authAPI.logout();
           
+          // Clear localStorage tokens
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          
           set({ 
             user: null,
             subscription: null,
@@ -145,6 +173,10 @@ const useAuthStore = create<AuthState>()(
             shouldAttemptRefresh: false // Disable refresh attempts on logout
           });
         } catch (error: any) {
+          // Clear localStorage tokens even if request fails
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          
           set({ 
             isLoading: false,
             // Even if logout fails on the server, we clear the user data

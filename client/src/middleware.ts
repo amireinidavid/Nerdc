@@ -38,6 +38,15 @@ export function middleware(request: NextRequest) {
   const accessToken = request.cookies.get('accessToken')?.value
   const refreshToken = request.cookies.get('refreshToken')?.value
   
+  // NOTE: We can't directly access localStorage in middleware since it runs on the server
+  // So in production (Vercel), we need to rely on the client-side auth handling
+  // If we're in production, allow the request to continue and let client-side handle auth
+  if (process.env.NODE_ENV === 'production') {
+    // For Vercel production environment, we'll let the client-side handle auth
+    return NextResponse.next()
+  }
+  
+  // Local development environment - use cookie-based auth checks
   // If no tokens, redirect to login
   if (!accessToken && !refreshToken) {
     const url = new URL('/login', request.url)

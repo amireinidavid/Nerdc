@@ -99,17 +99,24 @@ const RegisterPage = () => {
     
     try {
       // Register and check if profile completion is required
-      await register({ name, email, password });
+      const registerData = { name, email, password };
+      await register(registerData);
       
-      // Send welcome email after successful registration
-      await sendWelcomeEmail(name, email);
+      // Check if tokens were saved to localStorage (for Vercel production)
+      const accessToken = localStorage.getItem('accessToken');
+      if (accessToken) {
+        console.log('Tokens saved to localStorage after registration');
+      }
       
-      toast.success('Registration Successful', {
-        description: 'Welcome to the Journal Portal!',
+      toast.success('Account Created Successfully', {
+        description: 'Please complete your profile to continue.',
       });
       
-      // No need to redirect here, the useEffect will handle it
-      // when isAuthenticated becomes true
+      // Force the router to push to the profiles page
+      router.push('/profiles');
+      
+      // Cancel any default redirection behavior that might be stopping the navigation
+      return false;
     } catch (err) {
       // Error is already shown via the useEffect above
       console.error('Registration failed:', err);

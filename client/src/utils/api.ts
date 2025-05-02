@@ -9,9 +9,43 @@ const api = axios.create({
   withCredentials: true, // Important for cookies
 });
 
-// Response interceptor for handling errors
+// Request interceptor to add token from localStorage if available (for Vercel production)
+api.interceptors.request.use(
+  (config) => {
+    // If in browser environment
+    if (typeof window !== 'undefined') {
+      const accessToken = localStorage.getItem('accessToken');
+      
+      // If token exists in localStorage and we're not adding it already
+      if (accessToken && !config.headers['Authorization']) {
+        config.headers['Authorization'] = `Bearer ${accessToken}`;
+        // Also add as a custom header for our server middleware
+        config.headers['Access-Token'] = accessToken;
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response interceptor for handling errors and storing tokens from headers
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Check for tokens in headers (for Vercel production)
+    if (typeof window !== 'undefined') {
+      const accessToken = response.headers['access-token'];
+      const refreshToken = response.headers['refresh-token'];
+      
+      // Store tokens in localStorage if they were sent in headers
+      if (accessToken) {
+        localStorage.setItem('accessToken', accessToken);
+      }
+      if (refreshToken) {
+        localStorage.setItem('refreshToken', refreshToken);
+      }
+    }
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
     
@@ -22,13 +56,38 @@ api.interceptors.response.use(
       
       try {
         // Try to refresh the token
-        await api.post('/auth/refresh-token');
+        const refreshToken = localStorage.getItem('refreshToken');
+        
+        // If we have a refresh token in localStorage, include it in the request
+        if (refreshToken) {
+          originalRequest.headers['Refresh-Token'] = refreshToken;
+        }
+        
+        // Try to refresh
+        const response = await api.post('/auth/refresh-token');
+        
+        // Check for new tokens in headers
+        const newAccessToken = response.headers['access-token'];
+        const newRefreshToken = response.headers['refresh-token'];
+        
+        // Update localStorage if new tokens were provided
+        if (newAccessToken) {
+          localStorage.setItem('accessToken', newAccessToken);
+          originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+          originalRequest.headers['Access-Token'] = newAccessToken;
+        }
+        
+        if (newRefreshToken) {
+          localStorage.setItem('refreshToken', newRefreshToken);
+        }
         
         // Retry the original request
         return api(originalRequest);
       } catch (refreshError) {
-        // If refresh fails, redirect to login
+        // If refresh fails, clear localStorage and redirect to login
         if (typeof window !== 'undefined') {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
           window.location.href = '/login';
         }
         return Promise.reject(refreshError);

@@ -67,8 +67,22 @@ const ProfileCompletionPage = () => {
 
   // Check if user is already authenticated and profile is complete
   useEffect(() => {
+    // For production (Vercel), manually check localStorage for tokens
+    const accessToken = localStorage.getItem('accessToken');
+    
+    // Don't redirect if we have tokens and we're in this page
+    // This ensures the profile completion form is shown even in production
+    if (accessToken) {
+      console.log('Token found in localStorage, allowing profile completion');
+      return;
+    }
+    
+    // Only redirect if authenticated AND profile is already complete
     if (isAuthenticated && isProfileComplete()) {
       router.push('/dashboard');
+    } else if (!isAuthenticated && !accessToken) {
+      // If no tokens anywhere, redirect to login
+      router.push('/login');
     }
   }, [isAuthenticated, isProfileComplete, router]);
 

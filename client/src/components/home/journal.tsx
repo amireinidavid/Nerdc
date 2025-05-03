@@ -36,11 +36,11 @@ const JournalSection = () => {
   
   if (isLoading && journals.length === 0) {
     return (
-      <section className="py-16 bg-slate-950">
+      <section className="py-16 bg-white">
         <Container>
           <div className="flex flex-col items-center justify-center min-h-[300px]">
-            <Loader2 className="h-10 w-10 text-purple-500 animate-spin mb-4" />
-            <p className="text-white/60">Loading journals...</p>
+            <Loader2 className="h-10 w-10 text-emerald-500 animate-spin mb-4" />
+            <p className="text-gray-500">Loading journals...</p>
           </div>
         </Container>
       </section>
@@ -48,13 +48,13 @@ const JournalSection = () => {
   }
   
   return (
-    <section className="py-16 bg-slate-950">
+    <section className="py-16 bg-white">
       <Container>
         <div className="mb-10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end">
             <div>
               <motion.h2 
-                className="text-3xl md:text-4xl font-bold text-white mb-3"
+                className="text-3xl md:text-4xl font-bold text-gray-900 mb-3"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -63,7 +63,7 @@ const JournalSection = () => {
                 📚 Some of our Journal/Research
               </motion.h2>
               <motion.p 
-                className="text-white/60 max-w-2xl"
+                className="text-gray-600 max-w-2xl"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -80,7 +80,7 @@ const JournalSection = () => {
               transition={{ duration: 0.5, delay: 0.2 }}
             >
               <Link href="/journals">
-                <button className="px-4 py-2 rounded-full text-sm font-medium transition-colors bg-indigo-600 text-white hover:bg-indigo-700">
+                <button className="px-4 py-2 rounded-full text-sm font-medium transition-colors bg-emerald-600 text-white hover:bg-emerald-700">
                   View All
                 </button>
               </Link>
@@ -91,7 +91,7 @@ const JournalSection = () => {
         {/* Featured Journal */}
         {featuredJournal && (
           <motion.div 
-            className="mb-16 bg-gradient-to-br from-indigo-900/20 to-slate-900/20 rounded-2xl overflow-hidden border border-white/10 shadow-lg"
+            className="mb-16 bg-gradient-to-br from-emerald-50 to-white rounded-2xl overflow-hidden border border-emerald-100 shadow-lg"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -100,32 +100,32 @@ const JournalSection = () => {
             <div className="grid md:grid-cols-2 gap-6">
               <div className="p-6 md:p-10 flex flex-col justify-between">
                 <div>
-                  <div className="inline-block px-3 py-1 bg-indigo-600/20 border border-indigo-600/30 rounded-full text-indigo-400 text-xs font-semibold mb-5">
+                  <div className="inline-block px-3 py-1 bg-emerald-100 border border-emerald-200 rounded-full text-emerald-700 text-xs font-semibold mb-5">
                     Featured Journal
                   </div>
-                  <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">{featuredJournal.title}</h3>
+                  <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">{featuredJournal.title}</h3>
                   <div className="flex items-center mb-6">
-                    <div className="w-8 h-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                    <div className="w-8 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 rounded-full flex items-center justify-center text-white font-medium text-sm">
                       {featuredJournal.author?.name ? featuredJournal.author.name.charAt(0) : 'A'}
                     </div>
                     <div className="ml-3">
-                      <p className="text-white font-medium">{featuredJournal.author?.name || "Anonymous"}</p>
-                      <p className="text-white/60 text-sm">{featuredJournal.author?.institution || "Institution"}</p>
+                      <p className="text-gray-800 font-medium">{featuredJournal.author?.name || "Anonymous"}</p>
+                      <p className="text-gray-500 text-sm">{featuredJournal.author?.institution || "Institution"}</p>
                     </div>
                   </div>
-                  <p className="text-white/70 mb-6 line-clamp-4">{featuredJournal.abstract}</p>
+                  <p className="text-gray-600 mb-6 line-clamp-4">{featuredJournal.abstract}</p>
                 </div>
                 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-6">
                   <div className="flex flex-wrap gap-2 mb-4 sm:mb-0">
                     {featuredJournal.tags?.slice(0, 3).map((tagItem: any, index: number) => (
-                      <span key={tagItem.tag.id} className="text-xs text-white/60 px-2 py-1 bg-white/5 rounded-md">
+                      <span key={tagItem.tag.id} className="text-xs text-emerald-700 px-2 py-1 bg-emerald-50 rounded-md">
                         {tagItem.tag.name}
                       </span>
                     ))}
                   </div>
-                  <div className="flex items-center space-x-2 text-sm text-white/60">
-                    <span className="text-purple-400">{featuredJournal.viewCount || 0} views</span>
+                  <div className="flex items-center space-x-2 text-sm text-gray-500">
+                    <span className="text-emerald-600">{featuredJournal.viewCount || 0} views</span>
                     <span>•</span>
                     <span>{new Date(featuredJournal.createdAt).toLocaleDateString()}</span>
                   </div>
@@ -133,18 +133,18 @@ const JournalSection = () => {
                 
                 <div className="flex flex-col sm:flex-row gap-3 mt-8">
                   <Link href={`/journals/${featuredJournal.id}`}>
-                    <button className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg hover:shadow-indigo-500/20 transition-all">
+                    <button className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-medium rounded-lg hover:shadow-lg hover:shadow-emerald-500/20 transition-all">
                       View Details
                     </button>
                   </Link>
                   {featuredJournal.price ? (
-                    <button className="px-5 py-2.5 border border-white/10 text-white font-medium rounded-lg hover:bg-white/5 transition-colors flex items-center justify-center">
+                    <button className="px-5 py-2.5 border border-emerald-200 text-emerald-700 font-medium rounded-lg hover:bg-emerald-50 transition-colors flex items-center justify-center">
                       <span>Add to Cart</span>
-                      <span className="ml-2 text-white/60">${featuredJournal.price}</span>
+                      <span className="ml-2 text-gray-500">${featuredJournal.price}</span>
                     </button>
                   ) : (
                     <Link href={`/journals/${featuredJournal.id}`}>
-                      <button className="px-5 py-2.5 border border-white/10 text-white font-medium rounded-lg hover:bg-white/5 transition-colors flex items-center justify-center">
+                      <button className="px-5 py-2.5 border border-emerald-200 text-emerald-700 font-medium rounded-lg hover:bg-emerald-50 transition-colors flex items-center justify-center">
                         <span>Read Free</span>
                       </button>
                     </Link>
@@ -160,11 +160,11 @@ const JournalSection = () => {
                   width={800}
                   height={800}
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-purple-600/30"></div>
-                <div className="absolute inset-0 bg-slate-900/60"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 to-emerald-500/30"></div>
+                <div className="absolute inset-0 bg-black/30"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-32 h-32 bg-slate-900/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-indigo-500/30">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="w-32 h-32 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-emerald-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
                   </div>
@@ -179,7 +179,7 @@ const JournalSection = () => {
           {selectedJournals.map((journal, index) => (
             <motion.div
               key={journal.id}
-              className="bg-slate-900/50 rounded-xl overflow-hidden border border-white/10 h-full flex flex-col"
+              className="bg-white rounded-xl overflow-hidden border border-emerald-100 shadow-sm h-full flex flex-col"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -193,12 +193,12 @@ const JournalSection = () => {
                   width={800}
                   height={800}
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-900/90 z-10"></div>
-                <div className="absolute inset-0 bg-slate-900/60"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70 z-10"></div>
+                <div className="absolute inset-0 bg-black/30"></div>
                 <div className="absolute bottom-0 left-0 p-4 z-20">
                   <div className="flex space-x-2 mb-2">
                     {journal.tags?.slice(0, 2).map((tagItem: any) => (
-                      <span key={tagItem.tag.id} className="text-xs text-white/60 px-2 py-0.5 bg-white/5 rounded-md">
+                      <span key={tagItem.tag.id} className="text-xs text-white px-2 py-0.5 bg-emerald-500/30 backdrop-blur-sm rounded-md">
                         {tagItem.tag.name}
                       </span>
                     ))}
@@ -207,41 +207,41 @@ const JournalSection = () => {
               </div>
               
               <div className="p-5 flex-1 flex flex-col">
-                <h3 className="text-lg font-bold text-white mb-3 line-clamp-2">{journal.title}</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-3 line-clamp-2">{journal.title}</h3>
                 
                 <div className="flex items-center mb-4">
-                  <div className="w-6 h-6 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white font-medium text-xs">
+                  <div className="w-6 h-6 bg-gradient-to-r from-emerald-600 to-emerald-500 rounded-full flex items-center justify-center text-white font-medium text-xs">
                     {journal.author?.name ? journal.author.name.charAt(0) : 'A'}
                   </div>
                   <div className="ml-2">
-                    <p className="text-white text-sm font-medium">{journal.author?.name || "Anonymous"}</p>
-                    <p className="text-white/50 text-xs">{journal.author?.institution || "Institution"}</p>
+                    <p className="text-gray-800 text-sm font-medium">{journal.author?.name || "Anonymous"}</p>
+                    <p className="text-gray-500 text-xs">{journal.author?.institution || "Institution"}</p>
                   </div>
                 </div>
                 
-                <p className="text-white/60 text-sm mb-4 line-clamp-3 flex-1">{journal.abstract}</p>
+                <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">{journal.abstract}</p>
                 
-                <div className="flex items-center justify-between text-xs text-white/50 mb-4">
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
                   <span>{new Date(journal.createdAt).toLocaleDateString()}</span>
                   <span>{journal.viewCount || 0} views</span>
                 </div>
                 
                 <div className="flex gap-2 mt-auto">
                   <Link href={`/journals/${journal.id}`} className="flex-1">
-                    <button className="w-full px-3 py-2 bg-indigo-600/20 text-indigo-400 font-medium rounded-lg hover:bg-indigo-600/30 transition-colors text-sm">
+                    <button className="w-full px-3 py-2 bg-emerald-50 text-emerald-700 font-medium rounded-lg hover:bg-emerald-100 transition-colors text-sm">
                       View Details
                     </button>
                   </Link>
                   {journal.price ? (
-                    <button className="px-3 py-2 border border-white/10 text-white/70 font-medium rounded-lg hover:bg-white/5 transition-colors text-sm flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <button className="px-3 py-2 border border-emerald-200 text-gray-700 font-medium rounded-lg hover:bg-emerald-50 transition-colors text-sm flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                       </svg>
                       ${journal.price}
                     </button>
                   ) : (
                     <Link href={`/journals/${journal.id}`}>
-                      <button className="px-3 py-2 border border-white/10 text-white/70 font-medium rounded-lg hover:bg-white/5 transition-colors text-sm">
+                      <button className="px-3 py-2 border border-emerald-200 text-gray-700 font-medium rounded-lg hover:bg-emerald-50 transition-colors text-sm">
                         Free
                       </button>
                     </Link>
@@ -261,7 +261,7 @@ const JournalSection = () => {
             transition={{ duration: 0.5, delay: 0.3 }}
           >
             <Link href="/journals">
-              <button className="px-6 py-3 border border-indigo-500/30 text-white font-medium rounded-lg hover:bg-indigo-600/10 transition-colors">
+              <button className="px-6 py-3 border border-emerald-200 text-emerald-700 font-medium rounded-lg hover:bg-emerald-50 transition-colors">
                 View All Journals
               </button>
             </Link>

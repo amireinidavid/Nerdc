@@ -159,12 +159,12 @@ export const JournalCard = ({
 
   return (
     <motion.div
-      className={`relative overflow-hidden rounded-xl bg-gradient-to-b from-white/[0.07] to-transparent backdrop-blur-sm border group ${getCardClasses()}`}
+      className={`relative overflow-hidden rounded-xl bg-white backdrop-blur-sm border group ${getCardClasses()}`}
       style={{
-        borderColor: isHovered ? 'rgba(99, 102, 241, 0.4)' : 'rgba(255, 255, 255, 0.1)',
+        borderColor: isHovered ? 'rgba(16, 185, 129, 0.4)' : 'rgba(229, 231, 235, 0.8)',
         boxShadow: isHovered 
-          ? '0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1), 0 0 10px 1px rgba(99, 102, 241, 0.15)' 
-          : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+          ? '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 10px 1px rgba(16, 185, 129, 0.15)' 
+          : '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)'
       }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -177,7 +177,7 @@ export const JournalCard = ({
       {/* Animated gradient border effect - only render when hovered for performance */}
       {isHovered && (
         <div 
-          className="absolute inset-0 bg-gradient-to-r from-purple-600/20 via-indigo-400/20 to-blue-500/20 opacity-100 transition-opacity duration-500"
+          className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 via-emerald-400/20 to-emerald-500/20 opacity-100 transition-opacity duration-500"
           style={{
             maskImage: 'linear-gradient(to bottom, black, transparent)',
             WebkitMaskImage: 'linear-gradient(to bottom, black, transparent)'
@@ -214,13 +214,13 @@ export const JournalCard = ({
         </motion.div>
         
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
         
         {/* Category Badge with animated glow - simplified hover effect */}
         <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10">
           <div className="relative">
-            <div className={`absolute inset-0 rounded-full bg-indigo-600 blur ${isHovered ? 'opacity-60' : 'opacity-0'} transition-opacity duration-300`} />
-            <div className="relative px-2 sm:px-3 py-1 text-xs font-medium text-white rounded-full bg-indigo-600/90">
+            <div className={`absolute inset-0 rounded-full bg-emerald-600 blur ${isHovered ? 'opacity-60' : 'opacity-0'} transition-opacity duration-300`} />
+            <div className="relative px-2 sm:px-3 py-1 text-xs font-medium text-white rounded-full bg-emerald-600/90">
               {category}
             </div>
           </div>
@@ -286,13 +286,13 @@ export const JournalCard = ({
       >
         {/* Title with animated color transition */}
         <h3 
-          className={`font-bold text-white mb-2 sm:mb-3 ${
+          className={`font-bold mb-2 sm:mb-3 ${
             variant === 'featured' 
               ? 'text-xl sm:text-2xl' 
               : 'text-lg sm:text-xl'
           } line-clamp-2`}
           style={{
-            color: isHovered ? 'rgb(129, 140, 248)' : 'rgb(255, 255, 255)',
+            color: isHovered ? 'rgb(5, 150, 105)' : 'rgb(31, 41, 55)',
             transition: 'color 0.3s ease'
           }}
         >
@@ -300,27 +300,27 @@ export const JournalCard = ({
         </h3>
         
         {/* Abstract text */}
-        <p className={`text-white/70 text-xs sm:text-sm mb-3 sm:mb-4 ${variant === 'compact' ? 'line-clamp-2' : 'line-clamp-3'}`}>
+        <p className={`text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 ${variant === 'compact' ? 'line-clamp-2' : 'line-clamp-3'}`}>
           {journal.abstract}
         </p>
         
         {/* Date and Read Time for featured variant */}
         {variant === 'featured' && (
-          <div className="flex justify-between text-xs text-white/80 mb-3 sm:mb-4">
+          <div className="flex justify-between text-xs text-gray-500 mb-3 sm:mb-4">
             <span>{formattedDate}</span>
             <span>{readTime}</span>
           </div>
         )}
         
         {/* Author info */}
-        <div className="mt-auto pt-3 sm:pt-4 border-t border-white/10">
+        <div className="mt-auto pt-3 sm:pt-4 border-t border-gray-100">
           <div className="flex items-center">
-            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-xs sm:text-sm mr-2 sm:mr-3">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-semibold text-xs sm:text-sm mr-2 sm:mr-3">
               {authorName.charAt(0)}
             </div>
             <div>
-              <p className="text-xs sm:text-sm font-medium text-white">{authorName}</p>
-              <p className="text-xs text-white/60">{authorInstitution}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-900">{authorName}</p>
+              <p className="text-xs text-gray-500">{authorInstitution}</p>
             </div>
           </div>
         </div>
@@ -330,9 +330,9 @@ export const JournalCard = ({
       <AnimatePresence>
         {isHovered && (
           <motion.div 
-            className="absolute inset-0 flex items-center justify-center bg-indigo-900/80 backdrop-blur-sm z-20"
+            className="absolute inset-0 flex items-center justify-center bg-emerald-50/90 backdrop-blur-sm z-20"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.9 }}
+            animate={{ opacity: 0.97 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
@@ -346,8 +346,8 @@ export const JournalCard = ({
                 href={`/journals/${journal.id}`} 
                 className="relative group/button"
               >
-                <span className="absolute inset-0 rounded-lg bg-indigo-500 blur-md group-hover/button:blur-lg transition-all duration-300 opacity-70"></span>
-                <span className="relative flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 text-sm font-medium text-indigo-800 bg-white rounded-lg group-hover/button:bg-white/90 transition-colors">
+                <span className="absolute inset-0 rounded-lg bg-emerald-500 blur-md group-hover/button:blur-lg transition-all duration-300 opacity-70"></span>
+                <span className="relative flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 text-sm font-medium text-white bg-emerald-600 rounded-lg group-hover/button:bg-emerald-700 transition-colors">
                 View Details
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-300 group-hover/button:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />

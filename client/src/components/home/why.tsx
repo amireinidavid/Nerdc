@@ -57,7 +57,7 @@ const features = [
 
 const WhyChooseUs = () => {
   return (
-    <section className="py-20 bg-gradient-to-b from-slate-950 to-indigo-950/70">
+    <section className="py-20 bg-gradient-to-b from-emerald-50 to-white">
       <Container>
         <div className="text-center max-w-3xl mx-auto mb-16">
           <motion.div
@@ -66,13 +66,13 @@ const WhyChooseUs = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <span className="inline-block text-indigo-400 font-medium mb-2 px-3 py-1 bg-indigo-400/10 rounded-full text-sm">
+            <span className="inline-block text-emerald-600 font-medium mb-2 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full text-sm">
               Our Platform Benefits
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
               🧑‍💻 Why Use Our Platform?
             </h2>
-            <p className="text-white/60 md:text-lg">
+            <p className="text-gray-600 md:text-lg">
               Discover how our academic platform empowers researchers, educators, and students with cutting-edge tools and a global network.
             </p>
           </motion.div>
@@ -82,24 +82,24 @@ const WhyChooseUs = () => {
           {features.map((feature, index) => (
             <motion.div
               key={feature.id}
-              className="bg-slate-900/50 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:border-indigo-500/30 transition-colors group"
+              className="bg-white rounded-xl p-6 border border-emerald-100 shadow-sm hover:border-emerald-300 transition-colors group"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
               <div className="flex items-start">
-                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-all">
                   {feature.icon}
                 </div>
                 
                 <div className="ml-4">
-                  <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
-                  <p className="text-white/60 mb-4">{feature.description}</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{feature.title}</h3>
+                  <p className="text-gray-600 mb-4">{feature.description}</p>
                   
                   <div className="flex items-baseline">
-                    <span className="text-2xl font-bold text-indigo-400">{feature.stat}</span>
-                    <span className="ml-2 text-white/40 text-sm">{feature.statLabel}</span>
+                    <span className="text-2xl font-bold text-emerald-600">{feature.stat}</span>
+                    <span className="ml-2 text-gray-500 text-sm">{feature.statLabel}</span>
                   </div>
                 </div>
               </div>
@@ -114,9 +114,9 @@ const WhyChooseUs = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.5 }}
         >
-          <div className="inline-flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-900/30 to-purple-900/30 py-4 px-6 rounded-2xl backdrop-blur-sm border border-indigo-500/20">
-            <span className="text-white/70">Ready to transform your academic journey?</span>
-            <button className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+          <div className="inline-flex items-center justify-center space-x-2 bg-gradient-to-r from-emerald-50 to-emerald-100 py-4 px-6 rounded-2xl shadow-sm border border-emerald-200">
+            <span className="text-gray-700">Ready to transform your academic journey?</span>
+            <button className="bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors">
               Get Started Now
             </button>
           </div>

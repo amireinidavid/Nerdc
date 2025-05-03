@@ -101,13 +101,34 @@ const AccountPage = () => {
   const profileUser = user as ProfileUser | null;
   
   // Profile form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    email: string;
+    bio: string;
+    profileImage: string;
+    phone: string;
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    postalCode: string;
+    website: string;
+    linkedinUrl: string;
+    twitterHandle: string;
+    institution: string;
+    department: string;
+    position: string;
+    researchInterests: string;
+    orcidId: string;
+    googleScholarId: string;
+    publicationsCount: number | null | undefined;
+    citationsCount: number | null | undefined;
+    hIndex: number | null | undefined;
+  }>({
     name: user?.name || '',
     email: user?.email || '',
     bio: user?.bio || '',
     profileImage: user?.profileImage || '',
-    
-    // Contact info
     phone: profileUser?.phone || '',
     address: profileUser?.address || '',
     city: profileUser?.city || '',
@@ -117,9 +138,18 @@ const AccountPage = () => {
     website: profileUser?.website || '',
     linkedinUrl: profileUser?.linkedinUrl || '',
     twitterHandle: profileUser?.twitterHandle || '',
+    institution: '',
+    department: '',
+    position: '',
+    researchInterests: '',
+    orcidId: '',
+    googleScholarId: '',
+    publicationsCount: undefined,
+    citationsCount: undefined,
+    hIndex: undefined,
   });
 
-  // Researcher form state (only used if user is a researcher)
+  // Author form state (only used if user is an author)
   const [researcherData, setResearcherData] = useState<ResearcherProfile>({
     institution: '',
     department: '',
@@ -141,15 +171,20 @@ const AccountPage = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [researcherToggle, setResearcherToggle] = useState(isResearcher());
 
+  // Type the dependencies to avoid TypeScript errors
+  const typedIsAuthenticated: boolean = isAuthenticated;
+  const typedGetProfile: () => Promise<ProfileUser | null> = getProfile;
+  const typedRouter = router;
+
   // Fetch profile data on mount
   useEffect(() => {
     const fetchProfile = async () => {
       if (isAuthenticated) {
         const profile = await getProfile();
-        console.log(profile, "profile");
-        // If we got profile data, update the form
         if (profile) {
-          setFormData({
+          // Always update general fields
+          setFormData(prev => ({
+            ...prev,
             name: profile.name || '',
             email: profile.email || '',
             bio: profile.bio || '',
@@ -163,37 +198,26 @@ const AccountPage = () => {
             website: profile.website || '',
             linkedinUrl: profile.linkedinUrl || '',
             twitterHandle: profile.twitterHandle || '',
-          });
-
-          // Set researcher data if available
-          if (profile.role === 'AUTHOR') {
-            const researcher = profile.researcher;
-            if (researcher) {
-              setResearcherData({
-                institution: researcher.institution || '',
-                department: researcher.department || '',
-                position: researcher.position || '',
-                researchInterests: researcher.researchInterests || '',
-                orcidId: researcher.orcidId || '',
-                googleScholarId: researcher.googleScholarId || '',
-                publicationsCount: researcher.publicationsCount,
-                citationsCount: researcher.citationsCount,
-                hIndex: researcher.hIndex,
-              });
-            }
-            setResearcherToggle(true);
-          } else {
-            setResearcherToggle(false);
-          }
+            // If author, update author fields
+            ...(profile.role === 'AUTHOR' ? {
+              institution: profile.institution || '',
+              department: profile.department || '',
+              position: profile.position || '',
+              researchInterests: profile.researchInterests || '',
+              orcidId: profile.orcidId || '',
+              googleScholarId: profile.googleScholarId || '',
+              publicationsCount: profile.publicationsCount,
+              citationsCount: profile.citationsCount,
+              hIndex: profile.hIndex,
+            } : {})
+          }));
         }
       } else {
-        // Redirect to login if not authenticated
         router.push('/login');
       }
     };
-
     fetchProfile();
-  }, [isAuthenticated, getProfile, router]);
+  }, [typedIsAuthenticated, typedGetProfile, typedRouter]);
 
   // Clear any errors when changing tabs
   useEffect(() => {
@@ -228,21 +252,33 @@ const AccountPage = () => {
     }
   };
 
-  // Toggle researcher status
+  // Toggle author status
   const handleResearcherToggle = async () => {
     try {
       // If turning off researcher status, just pass undefined
-      // If turning on, pass the researcher data
-      await toggleResearcherStatus(researcherToggle ? undefined : researcherData);
+      // If turning on, pass the author data from formData
+      const authorData = !researcherToggle ? {
+        institution: formData.institution || '',
+        department: formData.department || '',
+        position: formData.position || '',
+        researchInterests: formData.researchInterests || '',
+        orcidId: formData.orcidId || '',
+        googleScholarId: formData.googleScholarId || '',
+        publicationsCount: formData.publicationsCount || undefined,
+        citationsCount: formData.citationsCount || undefined,
+        hIndex: formData.hIndex || undefined,
+      } : undefined;
+      
+      await toggleResearcherStatus(authorData);
       toast.success(researcherToggle 
         ? 'Switched to regular user account' 
-        : 'Switched to researcher account');
+        : 'Switched to author account');
       setShowResearcherDialog(false);
       
       // Refresh profile data
       getProfile();
     } catch (err) {
-      toast.error('Failed to update researcher status');
+      toast.error('Failed to update author status');
     }
   };
 
@@ -335,7 +371,7 @@ const AccountPage = () => {
                 <p className="text-sm text-gray-500 mt-1">{user?.email}</p>
                 
                 <div className="mt-3 inline-flex items-center px-3 py-1 rounded-full text-sm bg-emerald-100 text-emerald-800">
-                  {isResearcher() ? 'Researcher' : 'Regular User'}
+                  {isResearcher() ? 'Researcher/Author' : 'Regular User'}
                 </div>
                 
                 {user?.bio && (
@@ -344,7 +380,7 @@ const AccountPage = () => {
               </div>
               
               <Separator className="my-6" />
-              
+              <Tabs>
               <nav className="space-y-1">
                 <TabsList className="flex flex-col w-full bg-transparent space-y-1 h-auto">
                   <TabsTrigger
@@ -384,7 +420,7 @@ const AccountPage = () => {
                       }`}
                     >
                       <FileText className="mr-2 h-4 w-4" />
-                      Researcher Info
+                      Author Info
                     </TabsTrigger>
                   )}
                   
@@ -402,6 +438,8 @@ const AccountPage = () => {
                   </TabsTrigger>
                 </TabsList>
               </nav>
+              </Tabs>
+              
             </CardContent>
           </Card>
           
@@ -497,7 +535,7 @@ const AccountPage = () => {
                   <CardHeader>
                     <CardTitle>Account Type</CardTitle>
                     <CardDescription>
-                      Switch between a regular user account and a researcher account
+                      Switch between a regular user account and an author account
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -511,13 +549,13 @@ const AccountPage = () => {
                         <div>
                           <h3 className="font-medium text-gray-900">
                             {isResearcher() 
-                              ? 'Researcher Account' 
+                              ? 'Author Account' 
                               : 'Regular User Account'}
                           </h3>
                           <p className="text-sm text-gray-600 mt-1">
                             {isResearcher()
                               ? 'You can publish research, participate in peer reviews, and build your academic profile.'
-                              : 'You can access research journals, save favorites, and follow researchers.'}
+                              : 'You can access research journals, save favorites, and follow authors.'}
                           </p>
                         </div>
                       </div>
@@ -675,14 +713,14 @@ const AccountPage = () => {
               </motion.div>
             )}
             
-            {/* Researcher Tab (only if user is a researcher) */}
+            {/* Author Tab (only if user is an author) */}
             {activeTab === 'researcher' && isResearcher() && (
               <motion.div variants={fadeIn} key="researcher">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Academic Information</CardTitle>
+                    <CardTitle>Author Information</CardTitle>
                     <CardDescription>
-                      Manage your research profile and academic credentials
+                      Manage your author profile and academic credentials
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
@@ -693,8 +731,8 @@ const AccountPage = () => {
                           <Input
                             id="institution"
                             name="institution"
-                            value={researcherData.institution}
-                            onChange={handleResearcherChange}
+                            value={formData.institution}
+                            onChange={handleChange}
                             disabled={!isEditing}
                             className={isEditing ? "bg-white" : "bg-gray-50"}
                           />
@@ -705,8 +743,8 @@ const AccountPage = () => {
                           <Input
                             id="department"
                             name="department"
-                            value={researcherData.department}
-                            onChange={handleResearcherChange}
+                            value={formData.department}
+                            onChange={handleChange}
                             disabled={!isEditing}
                             className={isEditing ? "bg-white" : "bg-gray-50"}
                           />
@@ -718,8 +756,8 @@ const AccountPage = () => {
                         <Input
                           id="position"
                           name="position"
-                          value={researcherData.position}
-                          onChange={handleResearcherChange}
+                          value={formData.position}
+                          onChange={handleChange}
                           disabled={!isEditing}
                           className={isEditing ? "bg-white" : "bg-gray-50"}
                         />
@@ -730,8 +768,8 @@ const AccountPage = () => {
                         <Textarea
                           id="researchInterests"
                           name="researchInterests"
-                          value={researcherData.researchInterests || ''}
-                          onChange={handleResearcherChange}
+                          value={formData.researchInterests || ''}
+                          onChange={handleChange}
                           disabled={!isEditing}
                           className={isEditing ? "bg-white resize-none" : "bg-gray-50 resize-none"}
                           rows={3}
@@ -745,8 +783,8 @@ const AccountPage = () => {
                             id="publicationsCount"
                             name="publicationsCount"
                             type="number"
-                            value={researcherData.publicationsCount !== undefined ? researcherData.publicationsCount : ''}
-                            onChange={handleResearcherChange}
+                            value={formData.publicationsCount !== undefined && formData.publicationsCount !== null ? formData.publicationsCount : ''}
+                            onChange={handleChange}
                             disabled={!isEditing}
                             className={isEditing ? "bg-white" : "bg-gray-50"}
                           />
@@ -758,8 +796,8 @@ const AccountPage = () => {
                             id="citationsCount"
                             name="citationsCount"
                             type="number"
-                            value={researcherData.citationsCount !== undefined ? researcherData.citationsCount : ''}
-                            onChange={handleResearcherChange}
+                            value={formData.citationsCount !== undefined && formData.citationsCount !== null ? formData.citationsCount : ''}
+                            onChange={handleChange}
                             disabled={!isEditing}
                             className={isEditing ? "bg-white" : "bg-gray-50"}
                           />
@@ -771,8 +809,8 @@ const AccountPage = () => {
                             id="hIndex"
                             name="hIndex"
                             type="number"
-                            value={researcherData.hIndex !== undefined ? researcherData.hIndex : ''}
-                            onChange={handleResearcherChange}
+                            value={formData.hIndex !== undefined && formData.hIndex !== null ? formData.hIndex : ''}
+                            onChange={handleChange}
                             disabled={!isEditing}
                             className={isEditing ? "bg-white" : "bg-gray-50"}
                           />
@@ -785,8 +823,8 @@ const AccountPage = () => {
                           <Input
                             id="orcidId"
                             name="orcidId"
-                            value={researcherData.orcidId || ''}
-                            onChange={handleResearcherChange}
+                            value={formData.orcidId || ''}
+                            onChange={handleChange}
                             disabled={!isEditing}
                             className={isEditing ? "bg-white" : "bg-gray-50"}
                           />
@@ -797,8 +835,8 @@ const AccountPage = () => {
                           <Input
                             id="googleScholarId"
                             name="googleScholarId"
-                            value={researcherData.googleScholarId || ''}
-                            onChange={handleResearcherChange}
+                            value={formData.googleScholarId || ''}
+                            onChange={handleChange}
                             disabled={!isEditing}
                             className={isEditing ? "bg-white" : "bg-gray-50"}
                           />
@@ -856,8 +894,8 @@ const AccountPage = () => {
             <DialogTitle>Change Account Type</DialogTitle>
             <DialogDescription>
               {isResearcher() 
-                ? 'Switch to a regular user account and hide your researcher information.' 
-                : 'Switch to a researcher account to publish your research and participate in peer reviews.'}
+                ? 'Switch to a regular user account and hide your author information.' 
+                : 'Switch to an author account to publish your research and participate in peer reviews.'}
             </DialogDescription>
           </DialogHeader>
           
@@ -870,7 +908,7 @@ const AccountPage = () => {
                   onCheckedChange={() => setResearcherToggle(!researcherToggle)}
                 />
                 <Label htmlFor="researcher-toggle" className="font-medium">
-                  {researcherToggle ? 'Switch to Regular User' : 'Switch to Researcher'}
+                  {researcherToggle ? 'Switch to Regular User' : 'Switch to Author'}
                 </Label>
               </div>
             </div>

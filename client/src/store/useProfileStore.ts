@@ -30,6 +30,16 @@ export interface ProfileUser extends User {
   website?: string;
   linkedinUrl?: string;
   twitterHandle?: string;
+
+  // Author-specific fields (optional, only present if role === 'AUTHOR')
+  department?: string | null;
+  position?: string | null;
+  researchInterests?: string | null;
+  orcidId?: string | null;
+  googleScholarId?: string | null;
+  publicationsCount?: number | null;
+  citationsCount?: number | null;
+  hIndex?: number | null;
 }
 
 export interface AdminUserListParams {

@@ -16,10 +16,19 @@ const corsOptions = {
     if (!origin) return callback(null, true);
     
     // Check if origin is allowed
-    const allowedOrigins = [process.env.CLIENT_URL];
-    if (process.env.NODE_ENV !== 'production') {
-      allowedOrigins.push(process.env.CLIENT_URL || "https://nerdc-journals.vercel.app");
+    const allowedOrigins = [
+      'https://nerdc-journal.vercel.app',
+      'https://nerdc-journals.vercel.app',
+      'http://localhost:3000'
+    ];
+    
+    // Add CLIENT_URL from env if it exists and is not already in the list
+    if (process.env.CLIENT_URL && !allowedOrigins.includes(process.env.CLIENT_URL)) {
+      allowedOrigins.push(process.env.CLIENT_URL);
     }
+    
+    console.log('Allowed origins:', allowedOrigins);
+    console.log('Request origin:', origin);
     
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);

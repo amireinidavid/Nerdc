@@ -24,39 +24,65 @@ declare global {
  */
 export const authenticate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // Get the token from the Authorization header
+    // Check for token in multiple places with fallbacks
     const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN format
+    const headerToken = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN format
+    const accessHeaderToken = req.headers['access-token'] as string;
+    const cookieToken = req.cookies?.accessToken;
+    
+    // Use token from any available source
+    const token = headerToken || accessHeaderToken || cookieToken;
 
     if (!token) {
-      // Also check for token in cookies
-      const cookieToken = req.cookies?.accessToken;
-      if (!cookieToken) {
-         res.status(401).json({
-          success: false,
-          message: 'Access denied. No token provided.'
-        });
-      }
+      res.status(401).json({
+        success: false,
+        message: 'Access denied. No token provided.'
+      });
+      return;
     }
     
-    // Use either the header token or cookie token
-    const actualToken = token || req.cookies?.accessToken;
-    
-    // Verify the token
-    const decoded = jwt.verify(actualToken, JWT_ACCESS_SECRET) as any;
-    
-    // Set the user in request for use in route handlers
-    req.user = {
-      id: decoded.id,
-      role: decoded.role,
-      email: decoded.email
-    };
-    
-    next();
+    try {
+      // Verify the token
+      const decoded = jwt.verify(token, JWT_ACCESS_SECRET) as any;
+      
+      // Check token type
+      if (decoded.tokenType !== "access") {
+        res.status(401).json({
+          success: false,
+          message: "Invalid token type"
+        });
+        return;
+      }
+      
+      // Set the user in request for use in route handlers
+      req.user = {
+        id: decoded.id,
+        role: decoded.role,
+        email: decoded.email || ''
+      };
+      
+      next();
+    } catch (jwtError) {
+      console.error('JWT Verification failed:', jwtError);
+      
+      if (jwtError instanceof jwt.TokenExpiredError) {
+        res.status(401).json({
+          success: false,
+          message: 'Token expired, please refresh'
+        });
+        return;
+      }
+      
+      res.status(401).json({
+        success: false,
+        message: 'Invalid token'
+      });
+    }
   } catch (error) {
-     res.status(401).json({
+    console.error('Authentication error:', error);
+    res.status(500).json({
       success: false,
-      message: 'Invalid token'
+      message: 'Authentication service error'
     });
   }
 };
@@ -68,31 +94,39 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
  */
 export const optionalAuthenticate = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Get the token from the Authorization header
+    // Check for token in multiple places with fallbacks
     const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN format
-    
-    // Also check for token in cookies
+    const headerToken = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN format
+    const accessHeaderToken = req.headers['access-token'] as string;
     const cookieToken = req.cookies?.accessToken;
     
-    // Use either the header token or cookie token
-    const actualToken = token || cookieToken;
+    // Use token from any available source
+    const token = headerToken || accessHeaderToken || cookieToken;
     
-    if (actualToken) {
-      // Verify the token
-      const decoded = jwt.verify(actualToken, JWT_ACCESS_SECRET) as any;
-      
-      // Set the user in request for use in route handlers
-      req.user = {
-        id: decoded.id,
-        role: decoded.role,
-        email: decoded.email
-      };
+    if (token) {
+      try {
+        // Verify the token
+        const decoded = jwt.verify(token, JWT_ACCESS_SECRET) as any;
+        
+        // Only set user if token is valid and correct type
+        if (decoded.tokenType === "access") {
+          // Set the user in request for use in route handlers
+          req.user = {
+            id: decoded.id,
+            role: decoded.role,
+            email: decoded.email || ''
+          };
+        }
+      } catch (jwtError) {
+        // If token verification fails, proceed without authentication
+        console.log('Optional auth: Token verification failed, continuing as unauthenticated');
+      }
     }
     
     next();
   } catch (error) {
-    // If token verification fails, proceed without authentication
+    // If any error occurs, proceed without authentication
+    console.error('Optional authentication error:', error);
     next();
   }
 };
@@ -104,6 +138,7 @@ export const authorize = (roles: UserRole[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
+        console.log('Authorization failed: No user in request');
         res.status(401).json({
           success: false,
           message: 'Access denied. Not authenticated.'
@@ -111,14 +146,33 @@ export const authorize = (roles: UserRole[]) => {
         return;
       }
       
-      if (!roles.includes(req.user.role)) {
+      // Normalize user role from token for comparison
+      const userRole = req.user.role;
+      console.log(`Authorization check: User role=${userRole}, Required roles=[${roles.join(', ')}]`);
+      
+      // Check if role is in the allowed roles list with flexible comparison
+      const isAuthorized = roles.some(role => {
+        // Case-insensitive string comparison if needed
+        if (typeof userRole === 'string' && typeof role === 'string') {
+          return userRole.toUpperCase() === role.toString().toUpperCase();
+        }
+        return userRole === role;
+      });
+      
+      if (!isAuthorized) {
+        console.log(`Authorization failed: User role=${userRole} not in allowed roles=[${roles.join(', ')}]`);
         res.status(403).json({
           success: false,
-          message: 'Access denied. Not authorized.'
+          message: 'Access denied. Not authorized.',
+          debug: { 
+            userRole,
+            requiredRoles: roles
+          }
         });
         return;
       }
       
+      console.log('Authorization successful');
       next();
     } catch(error) {
       console.error(`Error checking authorization: ${error}`);

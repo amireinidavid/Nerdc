@@ -44,6 +44,7 @@ interface AuthState {
   error: string | null;
   requiresProfileCompletion: boolean;
   shouldAttemptRefresh: boolean; // Flag to control refresh attempts
+  lastFailedAttempt: number | null; // Add timestamp of last failed attempt
   
   // Auth actions
   login: (email: string, password: string) => Promise<void>;
@@ -74,6 +75,7 @@ const useAuthStore = create<AuthState>()(
       error: null,
       requiresProfileCompletion: false,
       shouldAttemptRefresh: true, // Default to true
+      lastFailedAttempt: null,
       
       // Login action
       login: async (email: string, password: string) => {
@@ -158,7 +160,13 @@ const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true });
           
-          await authAPI.logout();
+          // Call logout API
+          try {
+            await authAPI.logout();
+          } catch (apiError) {
+            // Continue even if the API call fails
+            console.error("Logout API call failed, continuing local logout:", apiError);
+          }
           
           // Clear localStorage tokens
           localStorage.removeItem('accessToken');
@@ -170,7 +178,8 @@ const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             isLoading: false,
             requiresProfileCompletion: false,
-            shouldAttemptRefresh: false // Disable refresh attempts on logout
+            shouldAttemptRefresh: false, // Disable refresh attempts on logout
+            lastFailedAttempt: null
           });
         } catch (error: any) {
           // Clear localStorage tokens even if request fails
@@ -184,7 +193,8 @@ const useAuthStore = create<AuthState>()(
             subscription: null,
             isAuthenticated: false,
             requiresProfileCompletion: false,
-            shouldAttemptRefresh: false // Disable refresh attempts on logout
+            shouldAttemptRefresh: false, // Disable refresh attempts on logout
+            lastFailedAttempt: null
           });
         }
       },
@@ -195,9 +205,35 @@ const useAuthStore = create<AuthState>()(
         if (!get().shouldAttemptRefresh) {
           return;
         }
+        
+        // Don't retry too frequently - wait at least 10 seconds between failed attempts
+        const lastFailed = get().lastFailedAttempt;
+        if (lastFailed && Date.now() - lastFailed < 10000) {
+          console.log("Skipping profile fetch - too soon after previous failure");
+          return;
+        }
 
         try {
           set({ isLoading: true, error: null });
+          
+          // Check if we have a token before making the request
+          const hasToken = typeof window !== 'undefined' && (
+            localStorage.getItem('accessToken') !== null ||
+            document.cookie.includes('accessToken=')
+          );
+          
+          if (!hasToken) {
+            console.log("No authentication token available");
+            set({
+              user: null,
+              subscription: null,
+              isAuthenticated: false,
+              isLoading: false,
+              requiresProfileCompletion: false,
+              lastFailedAttempt: null
+            });
+            return;
+          }
           
           const response = await authAPI.getCurrentUser();
           const userData = response.data.data;
@@ -207,23 +243,73 @@ const useAuthStore = create<AuthState>()(
             subscription: userData.subscriptions?.[0] || null,
             isAuthenticated: true,
             isLoading: false,
-            requiresProfileCompletion: userData.profileStatus === 'INCOMPLETE'
+            requiresProfileCompletion: userData.profileStatus === 'INCOMPLETE',
+            lastFailedAttempt: null
           });
         } catch (error: any) {
+          console.error("Error fetching user profile:", error);
+          
+          // Record the timestamp of this failure
+          const now = Date.now();
+          set({ lastFailedAttempt: now });
+          
           // If 401, user is not authenticated
           if (error.response?.status === 401) {
-            set({ 
-              user: null,
-              subscription: null,
-              isAuthenticated: false,
-              isLoading: false,
-              requiresProfileCompletion: false,
-              shouldAttemptRefresh: false // Disable refresh attempts on auth failure
-            });
+            // Only try token refresh if we have a refresh token
+            const hasRefreshToken = typeof window !== 'undefined' && 
+              localStorage.getItem('refreshToken') !== null;
+              
+            if (!hasRefreshToken) {
+              console.log("No refresh token available, skipping refresh attempt");
+              set({ 
+                user: null,
+                subscription: null,
+                isAuthenticated: false,
+                isLoading: false,
+                requiresProfileCompletion: false,
+                shouldAttemptRefresh: false // Disable refresh attempts until next login
+              });
+              return;
+            }
+            
+            // Try token refresh before giving up
+            try {
+              console.log("Attempting token refresh");
+              await authAPI.refreshToken();
+              
+              // If refresh succeeds, try fetching profile again
+              console.log("Token refreshed, retrying profile fetch");
+              const response = await authAPI.getCurrentUser();
+              const userData = response.data.data;
+              
+              set({ 
+                user: userData,
+                subscription: userData.subscriptions?.[0] || null,
+                isAuthenticated: true,
+                isLoading: false,
+                requiresProfileCompletion: userData.profileStatus === 'INCOMPLETE',
+                lastFailedAttempt: null
+              });
+              return;
+            } catch (refreshError) {
+              console.error("Token refresh failed:", refreshError);
+              // If refresh fails, clear auth state
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('refreshToken');
+              
+              set({ 
+                user: null,
+                subscription: null,
+                isAuthenticated: false,
+                isLoading: false,
+                requiresProfileCompletion: false,
+                shouldAttemptRefresh: false // Disable refresh attempts until next login
+              });
+            }
           } else {
             set({ 
               isLoading: false, 
-              error: error.response?.data?.message || 'Failed to fetch user profile' 
+              error: error.response?.data?.message || 'Failed to fetch user profile'
             });
           }
         }
@@ -305,13 +391,35 @@ const useAuthStore = create<AuthState>()(
       // Check if user is a researcher (AUTHOR role)
       isResearcher: () => {
         const { user } = get();
-        return user?.role === 'AUTHOR';
+        if (!user) {
+          console.log("isResearcher check: No user found");
+          return false;
+        }
+        
+        const userRole = user.role;
+        const expectedRole = 'AUTHOR';
+        const isMatch = userRole === expectedRole;
+        const normalizedMatch = userRole?.toString().toUpperCase() === expectedRole.toUpperCase();
+        
+        console.log("isResearcher check:", { 
+          userRole, 
+          expectedRole, 
+          isExactMatch: isMatch,
+          normalizedMatch,
+          userObj: user
+        });
+        
+        // Use case-insensitive comparison to be more flexible
+        return normalizedMatch;
       },
       
       // Check if user is an admin
       isAdmin: () => {
         const { user } = get();
-        return user?.role === 'ADMIN';
+        if (!user) return false;
+        
+        // Use case-insensitive comparison for consistency
+        return user.role?.toString().toUpperCase() === 'ADMIN'.toUpperCase();
       }
     }),
     {

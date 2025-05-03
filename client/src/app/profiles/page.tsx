@@ -578,7 +578,7 @@ const ProfileCompletionPage = () => {
           </motion.div>
         );
       
-      case 'researcher-info':
+     case 'researcher-info':
         return (
           <motion.div
             initial={{ opacity: 0, y: 20 }}

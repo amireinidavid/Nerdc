@@ -9,13 +9,15 @@ const prisma = new PrismaClient();
 // Create a new journal (initially as draft)
 export const createJournal = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Log the request body and files for debugging
+    // Enhanced debugging for request and user info
     console.log('Request body:', req.body);
     console.log('Request files:', req.files);
+    console.log('User from request:', JSON.stringify(req.user, null, 2));
     
     const userId = req.user?.id;
     
     if (!userId) {
+      console.log('Missing user ID in request');
       res.status(401).json({
         success: false,
         message: "Unauthorized - Please login to submit a journal",
@@ -24,14 +26,50 @@ export const createJournal = async (req: Request, res: Response): Promise<void> 
     }
 
     // Get user and check if they're an author
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+    let user;
+    try {
+      user = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+      console.log(`User lookup result: ${JSON.stringify(user, null, 2)}`);
+    } catch (dbError) {
+      console.error("Database connection error when checking author role:", dbError);
+      res.status(503).json({
+        success: false,
+        message: "Database service unavailable. Please try again later.",
+        error: "service_unavailable"
+      });
+      return;
+    }
 
-    if (!user || user.role !== UserRole.AUTHOR) {
+    // If we can't find the user or they're not an AUTHOR, reject
+    if (!user) {
+      console.log(`User with ID ${userId} not found when creating journal`);
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+      return;
+    }
+    
+    // Improved role checking - normalize the role string and do case-insensitive comparison
+    // Also added log to show exact values being compared
+    const normalizedUserRole = user.role.toString().toUpperCase();
+    const normalizedAuthorRole = UserRole.AUTHOR.toString().toUpperCase();
+    console.log("User role check:", { 
+      userId, 
+      userRole: user.role, 
+      normalizedUserRole,
+      expectedRole: UserRole.AUTHOR,
+      normalizedAuthorRole,
+      isMatch: normalizedUserRole === normalizedAuthorRole
+    });
+    
+    if (normalizedUserRole !== normalizedAuthorRole) {
       res.status(403).json({
         success: false,
         message: "Only authors can create journals",
+        debug: { role: user.role }
       });
       return;
     }
@@ -1017,33 +1055,47 @@ export const getUserJournals = async (req: Request, res: Response):Promise<void>
       whereClause.reviewStatus = status as ReviewStatus;
     }
 
-    // Get total count for pagination
-    const totalCount = await prisma.journal.count({ where: whereClause });
+    // Get total count for pagination and journals with error handling
+    let totalCount = 0;
+    let journals = [];
+    
+    try {
+      // Get total count for pagination
+      totalCount = await prisma.journal.count({ where: whereClause });
 
-    // Get user's journals WITH AUTHOR INCLUDED
-    const journals = await prisma.journal.findMany({
-      where: whereClause,
-      skip,
-      take: pageSize,
-      orderBy: { createdAt: "desc" },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            institution: true,
-            profileImage: true
-          }
-        },
-        category: true,
-        tags: {
-          include: {
-            tag: true,
+      // Get user's journals WITH AUTHOR INCLUDED
+      journals = await prisma.journal.findMany({
+        where: whereClause,
+        skip,
+        take: pageSize,
+        orderBy: { createdAt: "desc" },
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              institution: true,
+              profileImage: true
+            }
+          },
+          category: true,
+          tags: {
+            include: {
+              tag: true,
+            },
           },
         },
-      },
-    });
+      });
+    } catch (dbError) {
+      console.error("Database connection error when fetching journals:", dbError);
+      res.status(503).json({
+        success: false,
+        message: "Database service unavailable. Please try again later.",
+        error: "service_unavailable"
+      });
+      return;
+    }
 
     res.status(200).json({
       success: true,
@@ -1058,7 +1110,20 @@ export const getUserJournals = async (req: Request, res: Response):Promise<void>
     });
   } catch (error) {
     console.error("Error getting user journals:", error);
-     res.status(500).json({
+    
+    // Check if this is a Prisma database connection error
+    const err = error as any;
+    if (err.constructor?.name === 'PrismaClientInitializationError' || 
+        err.message?.includes("Can't reach database server")) {
+      res.status(503).json({
+        success: false,
+        message: "Database service unavailable. Please try again later.",
+        error: "service_unavailable"
+      });
+      return;
+    }
+    
+    res.status(500).json({
       success: false,
       message: "Failed to get your journals",
       error: error instanceof Error ? error.message : "Unknown error",
@@ -1563,6 +1628,195 @@ export const viewJournalPDF = async (req: Request, res: Response):Promise<void> 
       success: false,
       message: "Failed to access PDF",
       error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+// Get all published journals for public access without authentication
+export const getPublishedJournals = async (req: Request, res: Response): Promise<void> => {
+  try {
+    // Parse query parameters
+    const { 
+      page = 1, 
+      limit = 10,
+      category,
+      search,
+      tags,
+      sortBy = "createdAt",
+      sortOrder = "desc"
+    } = req.query;
+
+    const pageNumber = parseInt(page as string, 10);
+    const pageSize = parseInt(limit as string, 10);
+    const skip = (pageNumber - 1) * pageSize;
+
+    // Build filters - always show only published journals
+    let whereClause: Prisma.JournalWhereInput = {
+      isPublished: true,
+      reviewStatus: ReviewStatus.PUBLISHED,
+    };
+
+    // Apply additional filters
+    if (category) {
+      whereClause.categoryId = parseInt(category as string, 10);
+    }
+
+    if (search) {
+      const searchTerm = search as string;
+      whereClause.OR = [
+        { title: { contains: searchTerm, mode: 'insensitive' } },
+        { abstract: { contains: searchTerm, mode: 'insensitive' } },
+        { content: { contains: searchTerm, mode: 'insensitive' } },
+      ];
+    }
+
+    if (tags) {
+      const tagArray = Array.isArray(tags) 
+        ? tags.map(tag => parseInt(tag as string, 10))
+        : [parseInt(tags as string, 10)];
+      
+      whereClause.tags = {
+        some: {
+          tagId: {
+            in: tagArray
+          }
+        }
+      };
+    }
+
+    // Determine sort direction
+    const orderBy = {
+      [sortBy as string]: sortOrder === "asc" ? "asc" : "desc"
+    };
+
+    // Get total count for pagination
+    const totalCount = await prisma.journal.count({ where: whereClause });
+
+    // Get published journals
+    const journals = await prisma.journal.findMany({
+      where: whereClause,
+      skip,
+      take: pageSize,
+      orderBy,
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            institution: true,
+            profileImage: true,
+          },
+        },
+        category: true,
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      data: journals,
+      pagination: {
+        total: totalCount,
+        page: pageNumber,
+        pageSize,
+        totalPages: Math.ceil(totalCount / pageSize),
+        hasMore: pageNumber < Math.ceil(totalCount / pageSize),
+      },
+    });
+  } catch (error) {
+    console.error("Error getting published journals:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get published journals",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+// New diagnostic endpoint to check user authentication and role status
+export const checkUserStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    // Check if user exists in the request
+    if (!req.user) {
+      res.status(200).json({
+        success: false,
+        message: "No authenticated user found in request",
+        authInfo: {
+          headers: {
+            authorization: req.headers.authorization ? 'Present' : 'Missing',
+            cookie: req.headers.cookie ? 'Present' : 'Missing'
+          }
+        }
+      });
+      return;
+    }
+
+    // Get current authenticated user info
+    const userId = req.user.id;
+    
+    let userFromDb;
+    try {
+      userFromDb = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          institution: true,
+          createdAt: true
+        }
+      });
+    } catch (dbError) {
+      console.error("Database error when fetching user:", dbError);
+      res.status(200).json({
+        success: false,
+        message: "Database connection error",
+        user: req.user,
+        error: dbError instanceof Error ? dbError.message : "Unknown database error"
+      });
+      return;
+    }
+
+    if (!userFromDb) {
+      res.status(200).json({
+        success: false,
+        message: "User found in token but not in database",
+        tokenUser: req.user
+      });
+      return;
+    }
+
+    // Check if user has AUTHOR role
+    const isAuthor = userFromDb.role === UserRole.AUTHOR;
+    const normalizedDbRole = userFromDb.role.toString().toUpperCase();
+    const normalizedAuthorRole = UserRole.AUTHOR.toString().toUpperCase();
+    
+    res.status(200).json({
+      success: true,
+      message: "User authentication check complete",
+      user: userFromDb,
+      authStatus: {
+        authenticated: true,
+        isAuthor: isAuthor,
+        roleCheck: {
+          dbRole: userFromDb.role,
+          expectedRole: UserRole.AUTHOR,
+          isExactMatch: userFromDb.role === UserRole.AUTHOR,
+          normalizedMatch: normalizedDbRole === normalizedAuthorRole
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Error checking user status:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error checking user status",
+      error: error instanceof Error ? error.message : "Unknown error"
     });
   }
 };

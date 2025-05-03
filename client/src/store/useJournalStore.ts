@@ -107,6 +107,7 @@ interface JournalState {
   
   // Actions
   fetchJournals: (page?: number, limit?: number, filters?: FilterOptions) => Promise<void>;
+  fetchPublishedJournals: (page?: number, limit?: number, filters?: FilterOptions) => Promise<void>;
   fetchJournalById: (id: number) => Promise<void>;
   createJournal: (journalData: FormData) => Promise<Journal | null>;
   updateJournal: (id: number, journalData: FormData) => Promise<Journal | null>;
@@ -165,6 +166,26 @@ const useJournalStore = create<JournalState>()(
             });
           } catch (error: any) {
             console.error('Error fetching journals:', error);
+            set({ 
+              error: error.response?.data?.message || 'Failed to fetch journals', 
+              isLoading: false 
+            });
+          }
+        },
+        
+        // Fetch all published journals without authentication
+        fetchPublishedJournals: async (page = 1, limit = 10, filters = {}) => {
+          try {
+            set({ isLoading: true, error: null });
+            const response = await journalAPI.getPublishedJournals(page, limit, filters);
+            set({ 
+              journals: response.data.data,
+              pagination: response.data.pagination,
+              filters,
+              isLoading: false
+            });
+          } catch (error: any) {
+            console.error('Error fetching published journals:', error);
             set({ 
               error: error.response?.data?.message || 'Failed to fetch journals', 
               isLoading: false 

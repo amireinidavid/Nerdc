@@ -336,15 +336,15 @@ export function Header() {
             
             {!user ? (
               <div className="flex justify-center mt-10">
-                <button 
+              <button 
                   className="bg-gradient-to-r from-emerald-600 to-emerald-500 text-white px-10 py-3 rounded-full font-medium hover:shadow-lg hover:shadow-emerald-500/20 transition-all w-full max-w-xs"
-                  onClick={() => {
-                    setIsOpen(false);
-                    router.push("/login");
-                  }}
-                >
-                  Log In
-                </button>
+                onClick={() => {
+                  setIsOpen(false);
+                  router.push("/login");
+                }}
+              >
+                Log In
+              </button>
               </div>
             ) : (
               <div className="flex flex-col space-y-3 mt-10">

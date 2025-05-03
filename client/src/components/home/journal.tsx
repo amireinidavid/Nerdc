@@ -9,14 +9,14 @@ import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
 
 const JournalSection = () => {
-  const { journals, fetchJournals, isLoading } = useJournalStore();
+  const { journals, fetchPublishedJournals, isLoading } = useJournalStore();
   const [selectedJournals, setSelectedJournals] = useState<any[]>([]);
   const [featuredJournal, setFeaturedJournal] = useState<any>(null);
-  
+  console.log(fetchPublishedJournals);
   useEffect(() => {
-    // Fetch journals on mount
-    fetchJournals(1, 20);
-  }, [fetchJournals]);
+    // Fetch published journals on mount
+    fetchPublishedJournals(1, 20);
+  }, [fetchPublishedJournals]);
   
   useEffect(() => {
     if (journals.length > 0) {

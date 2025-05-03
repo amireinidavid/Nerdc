@@ -20,7 +20,7 @@ const cookieConfig: CookieOptions = {
   httpOnly: true,
   secure: NODE_ENV === "production",
   sameSite: NODE_ENV === "production" ? "none" : "lax",
-  domain: NODE_ENV === "production" ? undefined : COOKIE_DOMAIN,
+  domain: undefined, // Remove domain restriction which can cause issues
   path: "/",
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
 };
@@ -66,10 +66,22 @@ const setAuthCookies = (res: Response, accessToken: string, refreshToken: string
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
   
-  // For Vercel serverless functions, also include tokens in response headers
-  if (NODE_ENV === "production") {
-    res.setHeader("Access-Token", accessToken);
-    res.setHeader("Refresh-Token", refreshToken);
+  // Always include tokens in response headers for hybrid approach
+  res.setHeader("Access-Token", accessToken);
+  res.setHeader("Refresh-Token", refreshToken);
+  
+  // Include headers in Access-Control-Expose-Headers
+  const exposedHeaders = res.getHeader('Access-Control-Expose-Headers') || '';
+  // Convert to string to safely check includes (handles string, number, or string[] return types)
+  const exposedHeadersStr = typeof exposedHeaders === 'string' 
+    ? exposedHeaders 
+    : Array.isArray(exposedHeaders) 
+      ? exposedHeaders.join(', ') 
+      : String(exposedHeaders);
+
+  if (!exposedHeadersStr.includes('Access-Token')) {
+    res.setHeader('Access-Control-Expose-Headers', 
+      exposedHeadersStr ? `${exposedHeadersStr}, Access-Token, Refresh-Token` : 'Access-Token, Refresh-Token');
   }
 };
 
@@ -164,9 +176,20 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 
     // Check if user exists
-    const userRecord = await prisma.user.findUnique({
-      where: { email },
-    });
+    let userRecord;
+    try {
+      userRecord = await prisma.user.findUnique({
+        where: { email },
+      });
+    } catch (dbError) {
+      console.error("Database connection error during login:", dbError);
+      res.status(503).json({
+        success: false,
+        message: "Database service unavailable. Please try again later.",
+        error: "service_unavailable"
+      });
+      return;
+    }
 
     if (!userRecord) {
       res.status(401).json({
@@ -207,6 +230,17 @@ export const loginUser = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Login error:", error);
+    // Check if this is a Prisma database connection error
+    const err = error as any;
+    if (err.constructor?.name === 'PrismaClientInitializationError' || 
+        err.message?.includes("Can't reach database server")) {
+      res.status(503).json({
+        success: false,
+        message: "Database service unavailable. Please try again later.",
+        error: "service_unavailable"
+      });
+      return;
+    }
     res.status(500).json({
       success: false,
       message: "Error logging in",
@@ -260,13 +294,16 @@ export const logoutUser = async (req: Request, res: Response) => {
 // Refresh tokens
 export const refreshTokens = async (req: Request, res: Response) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    // Check for refresh token in cookies OR headers OR request body
+    const refreshToken = req.cookies.refreshToken || 
+                        req.headers['refresh-token'] as string || 
+                        req.body.refreshToken;
 
     if (!refreshToken) {
-       return res.status(401).json({
-        success: false,
-        message: "Refresh token missing",
-      });
+      // Don't send an error response for missing token, just return a specific status
+      // that the client can handle silently
+      clearAuthCookies(res);
+      return res.status(204).end(); // No content - client should handle silently
     }
 
     // Verify refresh token
@@ -274,29 +311,21 @@ export const refreshTokens = async (req: Request, res: Response) => {
     try {
       decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET as jwt.Secret);
     } catch (error) {
+      console.error("Token verification failed:", error);
       clearAuthCookies(res);
-       return res.status(401).json({
-        success: false,
-        message: "Invalid or expired refresh token",
-      });
+      return res.status(204).end(); // No content - client should handle silently  
     }
 
     // Check token type
     if (decoded.tokenType !== "refresh") {
       clearAuthCookies(res);
-       return res.status(401).json({
-        success: false,
-        message: "Invalid token type",
-      });
+      return res.status(204).end(); // No content - client should handle silently
     }
 
     // Check if token is blacklisted
     if (decoded.jti && tokenBlacklist.has(decoded.jti)) {
       clearAuthCookies(res);
-       return res.status(401).json({
-        success: false,
-        message: "Token has been revoked",
-      });
+      return res.status(204).end(); // No content - client should handle silently
     }
 
     // Get user from database
@@ -306,13 +335,10 @@ export const refreshTokens = async (req: Request, res: Response) => {
 
     if (!user) {
       clearAuthCookies(res);
-       return res.status(401).json({
-        success: false,
-        message: "User not found",
-      });
+      return res.status(204).end(); // No content - client should handle silently
     }
 
-    // Blacklist the current refresh token
+    // Add current token to blacklist ONLY after verifying everything is valid
     if (decoded.jti) {
       tokenBlacklist.add(decoded.jti);
     }
@@ -326,19 +352,19 @@ export const refreshTokens = async (req: Request, res: Response) => {
     // Set new cookies
     setAuthCookies(res, accessToken, newRefreshToken);
 
-    //  minimal user info
+    // Return success with minimal user info
     res.status(200).json({
       success: true,
       message: "Token refreshed successfully",
+      data: {
+        userId: user.id,
+        role: user.role
+      }
     });
   } catch (error) {
     console.error("Token refresh error:", error);
     clearAuthCookies(res);
-    res.status(500).json({
-      success: false,
-      message: "Error refreshing token",
-      error: (error as Error).message,
-    });
+    return res.status(204).end(); // No content - client should handle silently
   }
 };
 
@@ -355,19 +381,29 @@ export const getCurrentUser = async (req: Request, res: Response) => {
       });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        subscriptions: {
-          include: {
-            plan: true,
-          },
-          where: {
-            status: "ACTIVE",
+    let user;
+    try {
+      user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          subscriptions: {
+            include: {
+              plan: true,
+            },
+            where: {
+              status: "ACTIVE",
+            },
           },
         },
-      },
-    });
+      });
+    } catch (dbError) {
+      console.error("Database connection error in getCurrentUser:", dbError);
+      return res.status(503).json({
+        success: false,
+        message: "Database service unavailable. Please try again later.",
+        error: "service_unavailable"
+      });
+    }
 
     if (!user) {
       clearAuthCookies(res);
@@ -386,6 +422,18 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Get user error:", error);
+    
+    // Check if this is a Prisma database connection error
+    const err = error as any;
+    if (err.constructor?.name === 'PrismaClientInitializationError' || 
+        err.message?.includes("Can't reach database server")) {
+      return res.status(503).json({
+        success: false,
+        message: "Database service unavailable. Please try again later.",
+        error: "service_unavailable"
+      });
+    }
+    
     res.status(500).json({
       success: false,
       message: "Error fetching user",

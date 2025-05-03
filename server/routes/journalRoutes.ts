@@ -34,9 +34,13 @@ const fileUploadMiddleware = fileUpload({
 });
 
 // Public routes (with optional authentication)
+router.get('/public', JournalController.getPublishedJournals);
 router.get('/get', optionalAuthenticate, JournalController.getJournals);
 router.get('/get/:id', optionalAuthenticate, JournalController.getJournalById);
 router.get('/get/:id/view-pdf', optionalAuthenticate, JournalController.viewJournalPDF);
+
+// Diagnostic endpoint to check authentication status
+router.get('/check-auth', authenticate, JournalController.checkUserStatus);
 
 // Protected routes for all authenticated users
 router.get('/saved', authenticate, JournalController.getSavedJournals);

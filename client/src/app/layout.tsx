@@ -26,6 +26,10 @@ export const metadata: Metadata = {
   creator: "Nerdc Journal",
   publisher: "Nerdc Publishing",
   keywords: ["journal", "academic", "research", "papers", "scholarly", "publications"],
+  icons: {
+    icon: "/assets/logo.jpg",
+    apple: "/assets/logo.jpg",
+  },
 };
 
 export const viewport: Viewport = {

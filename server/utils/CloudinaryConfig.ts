@@ -4,28 +4,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { v4 as uuidv4 } from 'uuid';
-import { promisify } from 'util';
 
 // Configure Cloudinary with environment variables
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "dqdvwe2v3",
-  api_key: process.env.CLOUDINARY_API_KEY || "368943645241426",
-  api_secret: process.env.CLOUDINARY_API_SECRET || "18KfpRLIqwfsSKSt9Q4FYeOAM_A",
+  cloud_name:  "dqdvwe2v3",
+  api_key:"368943645241426",
+  api_secret: "18KfpRLIqwfsSKSt9Q4FYeOAM_A",
   secure: true,
 });
-
-// Initialize with fallback values if needed
-if (!process.env.CLOUDINARY_CLOUD_NAME) {
-  console.warn('CLOUDINARY_CLOUD_NAME environment variable is not set');
-}
-
-if (!process.env.CLOUDINARY_API_KEY) {
-  console.warn('CLOUDINARY_API_KEY environment variable is not set');
-}
-
-if (!process.env.CLOUDINARY_API_SECRET) {
-  console.warn('CLOUDINARY_API_SECRET environment variable is not set');
-}
 
 /**
  * Save file to temp directory and return the path
@@ -88,76 +74,39 @@ const uploadToCloudinary = async (
 };
 
 /**
- * Helper to check if Cloudinary is configured
- */
-export const isCloudinaryConfigured = () => {
-  return Boolean(
-    process.env.CLOUDINARY_CLOUD_NAME &&
-    process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_SECRET
-  );
-};
-
-/**
- * Upload a document to Cloudinary
+ * Upload a PDF document to Cloudinary
  * @param file - File object from multer, express-fileupload, etc.
- * @returns The URL of the uploaded document
+ * @returns The URL of the uploaded PDF
  */
 export const uploadDocument = async (file: any): Promise<string> => {
-  console.log('Starting document upload to Cloudinary...');
-  
+  let tempFilePath: string | undefined;
+  let fileName: string = '';
   try {
-    if (!isCloudinaryConfigured()) {
-      console.warn('Cloudinary not configured. Using fallback URL for document');
-      return `/uploads/test-document.pdf`;
-    }
-    
-    // Different handling based on the file object structure
-    if (file.tempFilePath) {
-      // express-fileupload object
-      console.log(`Uploading from temp file path: ${file.tempFilePath}`);
-      
-      // Verify the file exists before uploading
-      try {
-        await promisify(fs.access)(file.tempFilePath, fs.constants.R_OK);
-      } catch (err: any) {
-        console.error(`Cannot access temp file at ${file.tempFilePath}:`, err);
-        throw new Error(`Temp file not accessible: ${err.message}`);
-      }
-      
-      const result = await cloudinary.uploader.upload(file.tempFilePath, {
-        resource_type: 'raw',
-        folder: 'journals/documents',
-        public_id: `${Date.now()}-${file.name.split('.')[0]}`,
-      });
-      
-      console.log('Document uploaded to Cloudinary successfully');
-      return result.secure_url;
-    } else if (file.path) {
-      // multer object
-      console.log(`Uploading from path: ${file.path}`);
-      
-      // Verify the file exists before uploading
-      try {
-        await promisify(fs.access)(file.path, fs.constants.R_OK);
-      } catch (err: any) {
-        console.error(`Cannot access file at ${file.path}:`, err);
-        throw new Error(`File not accessible: ${err.message}`);
-      }
-      
-      const result = await cloudinary.uploader.upload(file.path, {
-        resource_type: 'raw',
-        folder: 'journals/documents',
-        public_id: `${Date.now()}-${file.originalname.split('.')[0]}`,
-      });
-      
-      console.log('Document uploaded to Cloudinary successfully');
-      return result.secure_url;
+    if (file.tempFilePath && file.size > 0) {
+      tempFilePath = file.tempFilePath;
+      fileName = file.name || file.originalname || 'document.pdf';
+    } else if (file.data && file.data.length > 0) {
+      fileName = file.name || file.originalname || 'document.pdf';
+      // Ensure fileName ends with .pdf
+      if (!fileName.toLowerCase().endsWith('.pdf')) fileName += '.pdf';
+      tempFilePath = path.join(os.tmpdir(), `${uuidv4()}-${fileName}`);
+      await fs.promises.writeFile(tempFilePath, file.data);
     } else {
-      throw new Error('Unsupported file object structure');
+      throw new Error('File is empty or missing');
     }
+    if (!tempFilePath) throw new Error('Temp file path not set');
+    // Remove extension from public_id so Cloudinary doesn't add .tmp
+    const publicId = path.parse(fileName).name;
+    // Always use 'raw' for PDFs
+    const { url } = await uploadToCloudinary(tempFilePath, 'pdfs', 'raw', publicId);
+    if (tempFilePath !== file.tempFilePath) {
+      await fs.promises.unlink(tempFilePath).catch(() => {});
+    }
+    return url;
   } catch (error) {
-    console.error('Error uploading document to Cloudinary:', error);
+    if (tempFilePath && tempFilePath !== file.tempFilePath) {
+      await fs.promises.unlink(tempFilePath).catch(() => {});
+    }
     throw error;
   }
 };
@@ -168,64 +117,26 @@ export const uploadDocument = async (file: any): Promise<string> => {
  * @returns The URL of the uploaded image
  */
 export const uploadThumbnail = async (file: any): Promise<string> => {
-  console.log('Starting thumbnail upload to Cloudinary...');
-  
+  let tempFilePath: string | undefined;
   try {
-    if (!isCloudinaryConfigured()) {
-      console.warn('Cloudinary not configured. Using fallback URL for thumbnail');
-      return `/uploads/test-thumbnail.jpg`;
-    }
-    
-    // Different handling based on the file object structure
-    if (file.tempFilePath) {
-      // express-fileupload object
-      console.log(`Uploading from temp file path: ${file.tempFilePath}`);
-      
-      // Verify the file exists before uploading
-      try {
-        await promisify(fs.access)(file.tempFilePath, fs.constants.R_OK);
-      } catch (err: any) {
-        console.error(`Cannot access temp file at ${file.tempFilePath}:`, err);
-        throw new Error(`Temp file not accessible: ${err.message}`);
-      }
-      
-      const result = await cloudinary.uploader.upload(file.tempFilePath, {
-        folder: 'journals/thumbnails',
-        public_id: `${Date.now()}-${file.name.split('.')[0]}`,
-        transformation: [
-          { width: 300, height: 400, crop: 'fill', gravity: 'auto' }
-        ]
-      });
-      
-      console.log('Thumbnail uploaded to Cloudinary successfully');
-      return result.secure_url;
-    } else if (file.path) {
-      // multer object
-      console.log(`Uploading from path: ${file.path}`);
-      
-      // Verify the file exists before uploading
-      try {
-        await promisify(fs.access)(file.path, fs.constants.R_OK);
-      } catch (err: any) {
-        console.error(`Cannot access file at ${file.path}:`, err);
-        throw new Error(`File not accessible: ${err.message}`);
-      }
-      
-      const result = await cloudinary.uploader.upload(file.path, {
-        folder: 'journals/thumbnails',
-        public_id: `${Date.now()}-${file.originalname.split('.')[0]}`,
-        transformation: [
-          { width: 300, height: 400, crop: 'fill', gravity: 'auto' }
-        ]
-      });
-      
-      console.log('Thumbnail uploaded to Cloudinary successfully');
-      return result.secure_url;
+    if (file.tempFilePath && file.size > 0) {
+      tempFilePath = file.tempFilePath;
+    } else if (file.data && file.data.length > 0) {
+      tempFilePath = path.join(os.tmpdir(), `${uuidv4()}-${file.name || 'upload.jpg'}`);
+      await fs.promises.writeFile(tempFilePath, file.data);
     } else {
-      throw new Error('Unsupported file object structure');
+      throw new Error('File is empty or missing');
     }
+    if (!tempFilePath) throw new Error('Temp file path not set');
+    const { url } = await uploadToCloudinary(tempFilePath, 'thumbnails', 'image');
+    if (tempFilePath !== file.tempFilePath) {
+      await fs.promises.unlink(tempFilePath).catch(() => {});
+    }
+    return url;
   } catch (error) {
-    console.error('Error uploading thumbnail to Cloudinary:', error);
+    if (tempFilePath && tempFilePath !== file.tempFilePath) {
+      await fs.promises.unlink(tempFilePath).catch(() => {});
+    }
     throw error;
   }
 };

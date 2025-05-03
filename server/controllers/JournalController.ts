@@ -679,6 +679,7 @@ export const deleteJournal = async (req: Request, res: Response):Promise<void> =
         success: false,
         message: "Invalid journal ID",
       });
+      return;
     }
 
     // Find the journal
@@ -691,6 +692,7 @@ export const deleteJournal = async (req: Request, res: Response):Promise<void> =
         success: false,
         message: "Journal not found",
       });
+      return;
     }
 
     // Check permissions
@@ -702,6 +704,7 @@ export const deleteJournal = async (req: Request, res: Response):Promise<void> =
         success: false,
         message: "You don't have permission to delete this journal",
       });
+      return;
     }
 
     // Authors can only delete drafts
@@ -710,37 +713,48 @@ export const deleteJournal = async (req: Request, res: Response):Promise<void> =
         success: false,
         message: "You can only delete journals that are in draft status",
       });
+      return;
     }
 
-    // Delete related records first
-    await prisma.tagsOnJournals.deleteMany({
-      where: { journalId },
+    // Use a transaction to ensure all related records are deleted
+    await prisma.$transaction(async (prisma) => {
+      // Delete related records first in proper order to avoid foreign key violations
+      console.log(`Deleting TagsOnJournals records for journal ${journalId}`);
+      await prisma.tagsOnJournals.deleteMany({
+        where: { journalId },
+      });
+
+      console.log(`Deleting Comments for journal ${journalId}`);
+      await prisma.comment.deleteMany({
+        where: { journalId },
+      });
+
+      console.log(`Deleting Downloads for journal ${journalId}`);
+      await prisma.download.deleteMany({
+        where: { journalId },
+      });
+
+      console.log(`Deleting SavedJournal entries for journal ${journalId}`);
+      await prisma.savedJournal.deleteMany({
+        where: { journalId },
+      });
+
+      // Finally delete the journal itself
+      console.log(`Deleting journal ${journalId}`);
+      await prisma.journal.delete({
+        where: { id: journalId },
+      });
     });
 
-    await prisma.comment.deleteMany({
-      where: { journalId },
-    });
+    console.log(`Journal ${journalId} and all related records deleted successfully`);
 
-    await prisma.download.deleteMany({
-      where: { journalId },
-    });
-
-    await prisma.savedJournal.deleteMany({
-      where: { journalId },
-    });
-
-    // Delete the journal
-    await prisma.journal.delete({
-      where: { id: journalId },
-    });
-
-     res.status(200).json({
+    res.status(200).json({
       success: true,
       message: "Journal deleted successfully",
     });
   } catch (error) {
     console.error("Error deleting journal:", error);
-     res.status(500).json({
+    res.status(500).json({
       success: false,
       message: "Failed to delete journal",
       error: error instanceof Error ? error.message : "Unknown error",

@@ -193,10 +193,10 @@ model Journal {
   author         User           @relation("JournalAuthor", fields: [authorId], references: [id])
   reviewer       User?          @relation("JournalReviewer", fields: [reviewerId], references: [id])
   category       Category       @relation(fields: [categoryId], references: [id])
-  tags           TagsOnJournals[]
-  downloads      Download[]
-  comments       Comment[]
-  savedBy        SavedJournal[]
+  tags           TagsOnJournals[] @relation("JournalTags")
+  downloads      Download[]     @relation("JournalDownloads")
+  comments       Comment[]      @relation("JournalComments")
+  savedBy        SavedJournal[] @relation("JournalSaved")
 
   @@index([authorId])
   @@index([reviewerId])
@@ -219,7 +219,7 @@ model TagsOnJournals {
   assignedAt     DateTime       @default(now())
 
   // Relations
-  journal        Journal        @relation(fields: [journalId], references: [id])
+  journal        Journal        @relation("JournalTags", fields: [journalId], references: [id], onDelete: Cascade)
   tag            Tag            @relation(fields: [tagId], references: [id])
 
   @@id([journalId, tagId])
@@ -236,7 +236,7 @@ model Download {
 
   // Relations
   user           User           @relation(fields: [userId], references: [id])
-  journal        Journal        @relation(fields: [journalId], references: [id])
+  journal        Journal        @relation("JournalDownloads", fields: [journalId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([journalId])
@@ -253,7 +253,7 @@ model Comment {
 
   // Relations
   user           User           @relation(fields: [userId], references: [id])
-  journal        Journal        @relation(fields: [journalId], references: [id])
+  journal        Journal        @relation("JournalComments", fields: [journalId], references: [id], onDelete: Cascade)
   parent         Comment?       @relation("CommentReplies", fields: [parentId], references: [id])
   replies        Comment[]      @relation("CommentReplies")
 
@@ -270,7 +270,7 @@ model SavedJournal {
 
   // Relations
   user           User           @relation(fields: [userId], references: [id])
-  journal        Journal        @relation(fields: [journalId], references: [id])
+  journal        Journal        @relation("JournalSaved", fields: [journalId], references: [id], onDelete: Cascade)
 
   @@unique([userId, journalId])
   @@index([userId])

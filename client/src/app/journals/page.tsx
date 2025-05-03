@@ -17,6 +17,43 @@ const JournalsContent = () => {
   const router = useRouter();
   const pathname = usePathname();
   
+  // If user is not authenticated, show login prompt
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-white text-gray-900 pt-16 sm:pt-20 md:pt-24 pb-12 sm:pb-16 md:pb-20">
+        <div className="container mx-auto px-4 sm:px-6 py-16 flex flex-col items-center justify-center">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center max-w-md mx-auto bg-white rounded-xl shadow-lg p-8 border border-emerald-100"
+          >
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Authentication Required</h2>
+            <p className="text-gray-600 mb-6">
+              Please sign in to access our collection of research journals and academic publications.
+            </p>
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+              onClick={() => router.push('/login')}
+            >
+              Sign In
+            </motion.button>
+            <p className="mt-4 text-sm text-gray-500">
+              Don't have an account? <Link href="/register" className="text-emerald-600 hover:text-emerald-700 font-medium">Create one now</Link>
+            </p>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+  
   // Initialize state from URL params for bookmarkable filters
   const [searchQuery, setSearchQuery] = useState(() => 
     searchParams?.get("q") || ""

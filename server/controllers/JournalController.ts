@@ -100,27 +100,48 @@ export const createJournal = async (req: Request, res: Response): Promise<void> 
       try {
         if (req.file) {
           // If using multer middleware (single file upload)
+          console.log('Processing single file upload via multer');
           pdfUrl = await uploadDocument(req.file);
         } else if (Array.isArray(req.files)) {
           // If using multer middleware (multiple files upload)
+          console.log('Processing multiple file upload via multer');
           const pdfFile = req.files.find(file => file.fieldname === 'pdf');
           const thumbnailFile = req.files.find(file => file.fieldname === 'thumbnail');
           
           if (pdfFile) {
+            console.log('Uploading PDF file:', pdfFile.originalname);
             pdfUrl = await uploadDocument(pdfFile);
           }
           
           if (thumbnailFile) {
+            console.log('Uploading thumbnail file:', thumbnailFile.originalname);
             thumbnailUrl = await uploadThumbnail(thumbnailFile);
           }
         } else {
           // If using express-fileupload
+          console.log('Processing file upload via express-fileupload');
           const files = req.files as any;
+          
           if (files.pdf) {
-            pdfUrl = await uploadDocument(files.pdf);
+            console.log('Uploading PDF file:', files.pdf.name);
+            try {
+              pdfUrl = await uploadDocument(files.pdf);
+              console.log('PDF uploaded successfully:', pdfUrl);
+            } catch (pdfError) {
+              console.error('PDF upload error:', pdfError);
+              throw pdfError;
+            }
           }
+          
           if (files.thumbnail) {
-            thumbnailUrl = await uploadThumbnail(files.thumbnail);
+            console.log('Uploading thumbnail file:', files.thumbnail.name);
+            try {
+              thumbnailUrl = await uploadThumbnail(files.thumbnail);
+              console.log('Thumbnail uploaded successfully:', thumbnailUrl);
+            } catch (thumbError) {
+              console.error('Thumbnail upload error:', thumbError);
+              throw thumbError;
+            }
           }
         }
       } catch (uploadError) {
@@ -134,6 +155,8 @@ export const createJournal = async (req: Request, res: Response): Promise<void> 
             thumbnailUrl = `/uploads/test-thumbnail.jpg`;
           }
         } else {
+          // In production, we need to fail properly
+          console.error("Production file upload error:", uploadError);
           res.status(500).json({
             success: false,
             message: "Failed to upload files. Check your Cloudinary configuration.",

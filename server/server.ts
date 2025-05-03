@@ -2,10 +2,22 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
+import fs from "fs";
 import { PrismaClient } from "./generated/prisma";
 import authRoutes from "./routes/authroutes";
 import profileRoutes from "./routes/profileRoutes";
 import journalRoutes from "./routes/journalRoutes";
+
+// Create temp directory for file uploads if it doesn't exist
+const tempDir = '/tmp';
+try {
+  if (!fs.existsSync(tempDir)) {
+    console.log(`Creating temp directory: ${tempDir}`);
+    fs.mkdirSync(tempDir, { recursive: true });
+  }
+} catch (error) {
+  console.error(`Error creating temp directory: ${error}`);
+}
 
 export const prisma = new PrismaClient();
 const app = express();
@@ -15,31 +27,27 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps, curl requests)
     if (!origin) return callback(null, true);
     
-    // Check if origin is allowed
+    // Hardcode the allowed origins to ensure they work in production
     const allowedOrigins = [
       'https://nerdc-journal.vercel.app',
       'https://nerdc-journals.vercel.app',
       'http://localhost:3000'
     ];
     
-    // Add CLIENT_URL from env if it exists and is not already in the list
-    if (process.env.CLIENT_URL && !allowedOrigins.includes(process.env.CLIENT_URL)) {
-      allowedOrigins.push(process.env.CLIENT_URL);
-    }
-    
-    console.log('Allowed origins:', allowedOrigins);
     console.log('Request origin:', origin);
     
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    // More permissive CORS check - allow if origin contains our domain names
+    if (allowedOrigins.some(allowed => origin.includes(allowed.replace('https://', '').replace('http://', '')))) {
       callback(null, true);
     } else {
+      console.warn(`CORS blocked for origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
-  exposedHeaders: ["Set-Cookie"], 
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie", "Access-Token", "Refresh-Token"],
+  exposedHeaders: ["Set-Cookie", "Access-Token", "Refresh-Token"], 
 };
 
 app.use(cookieParser());
@@ -47,9 +55,28 @@ app.use(express.json());
 app.use(cors(corsOptions));
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-// Debug middleware for cookies
+// Debug middleware for request info
 app.use((req, res, next) => {
-  console.log(`Request cookies: ${JSON.stringify(req.cookies)}`);
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  if (req.method === 'POST' || req.method === 'PUT') {
+    console.log(`Request headers: ${JSON.stringify(req.headers)}`);
+    console.log(`Request body: ${JSON.stringify(req.body)}`);
+    
+    // Log file upload information
+    if (req.files) {
+      try {
+        const fileInfo = Array.isArray(req.files) 
+          ? req.files.map(f => ({ name: f.originalname, size: f.size, mimetype: f.mimetype }))
+          : Object.keys(req.files).map(key => {
+              const file = (req.files as any)[key];
+              return { name: file.name, size: file.size, mimetype: file.mimetype };
+            });
+        console.log(`Request files: ${JSON.stringify(fileInfo)}`);
+      } catch (err) {
+        console.error('Error logging file info:', err);
+      }
+    }
+  }
   
   // Store the original setHeader method
   const originalSetHeader = res.setHeader;
@@ -102,13 +129,44 @@ app.use(
     res: express.Response,
     next: express.NextFunction
   ) => {
-    console.error(err.stack);
-    res.status(500).json({
+    console.error('Server error:', err);
+    
+    // Log detailed error information
+    console.error({
+      message: err.message,
+      stack: err.stack,
+      path: req.path,
+      method: req.method,
+      headers: req.headers,
+      body: req.body
+    });
+    
+    // Send appropriate error response
+    res.status(err.status || 500).json({
       success: false,
-      error: "Something went wrong!",
+      message: err.message || "Something went wrong!",
+      error: process.env.NODE_ENV === 'development' ? err.stack : undefined
     });
   }
 );
+
+// Catch unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Application specific logging, throwing an error, or other logic here
+});
+
+// Catch uncaught exceptions to prevent server crashes
+process.on('uncaughtException', (error: any) => {
+  console.error('Uncaught Exception:', error);
+  if (error instanceof Error && 'code' in error && error.code === 'ENOENT' && 'syscall' in error && error.syscall === 'mkdir') {
+    console.error('Directory creation error - ensure /tmp is writeable in deployment environment');
+  }
+  // For production, we want to log this but not crash
+  if (process.env.NODE_ENV !== 'production') {
+    process.exit(1);
+  }
+});
 
 process.on("SIGINT", async () => {
   await prisma.$disconnect();

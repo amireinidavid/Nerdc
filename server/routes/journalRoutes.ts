@@ -3,8 +3,21 @@ import * as JournalController from '../controllers/JournalController';
 import { authenticate, optionalAuthenticate, authorize } from '../middleware/authMiddleware';
 import { UserRole } from '../generated/prisma';
 import fileUpload from 'express-fileupload';
+import path from 'path';
+import fs from 'fs';
 
 const router = Router();
+
+// Ensure /tmp directory exists for Vercel serverless environment
+const tempDir = '/tmp';
+try {
+  if (!fs.existsSync(tempDir)) {
+    console.log(`Creating temp directory: ${tempDir}`);
+    fs.mkdirSync(tempDir, { recursive: true });
+  }
+} catch (error) {
+  console.error(`Error creating temp directory: ${error}`);
+}
 
 // Configure file upload middleware
 const fileUploadMiddleware = fileUpload({
@@ -12,7 +25,12 @@ const fileUploadMiddleware = fileUpload({
   createParentPath: true,
   abortOnLimit: true,
   useTempFiles: true,
-  tempFileDir: './tmp/'
+  tempFileDir: tempDir, // Use absolute path to system temp directory
+  debug: process.env.NODE_ENV !== 'production', // Enable debug in development
+  preserveExtension: true, // Preserve file extensions
+  uploadTimeout: 60000, // 60 seconds upload timeout
+  parseNested: true,
+  safeFileNames: true
 });
 
 // Public routes (with optional authentication)

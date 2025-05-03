@@ -288,12 +288,13 @@ const CreateJournalPage = () => {
         <motion.div variants={itemVariants}>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight md:text-4xl mb-2">Create New Journal</h1>
-              <p className="text-muted-foreground">Share your research with the academic community</p>
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900 md:text-4xl mb-2">Create New Journal</h1>
+              <p className="text-gray-600">Share your research with the academic community</p>
             </div>
             <Button 
               onClick={() => router.push('/my-journals')}
               variant="outline"
+              className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
             >
               Cancel
             </Button>
@@ -303,24 +304,23 @@ const CreateJournalPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <motion.div 
             variants={itemVariants}
-            className="relative rounded-xl border bg-card overflow-hidden p-6 lg:col-span-2"
+            className="relative rounded-xl border border-emerald-100 overflow-hidden p-6 lg:col-span-2 bg-white shadow-md"
             style={{
-              background: "linear-gradient(135deg, var(--gradient-start), var(--gradient-end))",
-              boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.07)",
+              background: "linear-gradient(135deg, #ffffff, #f0fdf4)",
             }}
           >
             {/* Hex grid pattern overlay */}
             <div className="absolute inset-0 opacity-10 pointer-events-none z-0"
               style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5.5l25 15v30l-25 15-25-15v-30z' stroke='%23a855f7' stroke-opacity='0.2' fill='none' stroke-width='0.5'/%3E%3C/svg%3E")`,
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5.5l25 15v30l-25 15-25-15v-30z' stroke='%2310b981' stroke-opacity='0.2' fill='none' stroke-width='0.5'/%3E%3C/svg%3E")`,
                 backgroundSize: '60px 60px'
               }}
             />
             
             {/* Glow effect */}
-            <div className="absolute inset-0 z-0 opacity-30"
+            <div className="absolute inset-0 z-0 opacity-20"
               style={{
-                background: "radial-gradient(circle at 50% 50%, var(--glow-color) 0%, transparent 70%)",
+                background: "radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.2) 0%, transparent 70%)",
               }}
             />
             
@@ -334,15 +334,15 @@ const CreateJournalPage = () => {
                       name="title"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base font-semibold">Title</FormLabel>
+                          <FormLabel className="text-base font-semibold text-gray-800">Title</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="Enter the title of your journal" 
-                              className="text-lg py-6 bg-background/20 backdrop-blur-sm border-white/10" 
+                              className="text-lg py-6 bg-white border-gray-200" 
                               {...field} 
                             />
                           </FormControl>
-                          <FormDescription>
+                          <FormDescription className="text-gray-600">
                             Provide a clear, descriptive title that effectively represents your research.
                           </FormDescription>
                           <FormMessage />
@@ -358,15 +358,15 @@ const CreateJournalPage = () => {
                       name="abstract"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base font-semibold">Abstract</FormLabel>
+                          <FormLabel className="text-base font-semibold text-gray-800">Abstract</FormLabel>
                           <FormControl>
                             <Textarea 
                               placeholder="Provide a summary of your research" 
-                              className="min-h-32 resize-y text-base bg-background/20 backdrop-blur-sm border-white/10"
+                              className="min-h-32 resize-y text-base bg-white border-gray-200"
                               {...field} 
                             />
                           </FormControl>
-                          <FormDescription>
+                          <FormDescription className="text-gray-600">
                             A concise summary of your research including objectives, methods, results, and conclusions (50-2000 characters).
                           </FormDescription>
                           <FormMessage />
@@ -382,13 +382,13 @@ const CreateJournalPage = () => {
                       name="categoryId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base font-semibold">Category</FormLabel>
+                          <FormLabel className="text-base font-semibold text-gray-800">Category</FormLabel>
                           <Select 
                             onValueChange={field.onChange} 
                             defaultValue={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger className="w-full bg-background/20 backdrop-blur-sm border-white/10">
+                              <SelectTrigger className="w-full bg-white border-gray-200">
                                 <SelectValue placeholder="Select a category" />
                               </SelectTrigger>
                             </FormControl>
@@ -403,7 +403,7 @@ const CreateJournalPage = () => {
                               ))}
                             </SelectContent>
                           </Select>
-                          <FormDescription>
+                          <FormDescription className="text-gray-600">
                             Choose the most appropriate category for your research.
                           </FormDescription>
                           <FormMessage />
@@ -419,13 +419,13 @@ const CreateJournalPage = () => {
                       name="publicationDate"
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel className="text-base font-semibold">Publication Date</FormLabel>
+                          <FormLabel className="text-base font-semibold text-gray-800">Publication Date</FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button
                                   variant="outline"
-                                  className="w-full justify-start text-left font-normal bg-background/20 backdrop-blur-sm border-white/10"
+                                  className="w-full justify-start text-left font-normal bg-white border-gray-200"
                                 >
                                   <CalendarIcon className="mr-2 h-4 w-4" />
                                   {field.value ? (
@@ -445,7 +445,7 @@ const CreateJournalPage = () => {
                               />
                             </PopoverContent>
                           </Popover>
-                          <FormDescription>
+                          <FormDescription className="text-gray-600">
                             Select the date when this research was or will be published.
                           </FormDescription>
                           <FormMessage />
@@ -461,17 +461,17 @@ const CreateJournalPage = () => {
                       name="doi"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base font-semibold">
+                          <FormLabel className="text-base font-semibold text-gray-800">
                             DOI (Digital Object Identifier)
                           </FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="10.xxxx/xxxxx" 
-                              className="bg-background/20 backdrop-blur-sm border-white/10"
+                              className="bg-white border-gray-200"
                               {...field} 
                             />
                           </FormControl>
-                          <FormDescription className="flex items-center gap-1">
+                          <FormDescription className="flex items-center gap-1 text-gray-600">
                             <Info className="h-4 w-4" />
                             Optional. If your paper has already been assigned a DOI, enter it here.
                           </FormDescription>
@@ -484,18 +484,18 @@ const CreateJournalPage = () => {
                   {/* Tags field */}
                   <motion.div variants={itemVariants}>
                     <div className="space-y-2">
-                      <FormLabel className="text-base font-semibold">Tags</FormLabel>
+                      <FormLabel className="text-base font-semibold text-gray-800">Tags</FormLabel>
                       <div className="flex flex-wrap gap-2 mb-3">
                         {selectedTags.map(tag => (
                           <div 
                             key={tag.id} 
-                            className="bg-primary/20 text-primary-foreground px-3 py-1 rounded-full text-sm flex items-center gap-1 backdrop-blur-sm"
+                            className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm flex items-center gap-1"
                           >
                             <span>{tag.name}</span>
                             <button 
                               type="button"
                               onClick={() => handleRemoveTag(tag)}
-                              className="text-primary-foreground/60 hover:text-primary-foreground"
+                              className="text-emerald-600/70 hover:text-emerald-700"
                             >
                               <X className="h-3 w-3" />
                             </button>
@@ -504,7 +504,7 @@ const CreateJournalPage = () => {
                       </div>
                       
                       <Select onValueChange={handleTagSelect}>
-                        <SelectTrigger className="w-full bg-background/20 backdrop-blur-sm border-white/10">
+                        <SelectTrigger className="w-full bg-white border-gray-200">
                           <SelectValue placeholder="Select tags for your journal" />
                         </SelectTrigger>
                         <SelectContent>
@@ -520,7 +520,7 @@ const CreateJournalPage = () => {
                         </SelectContent>
                       </Select>
                       
-                      <FormDescription>
+                      <FormDescription className="text-gray-600">
                         Add up to 5 tags that best describe your research.
                       </FormDescription>
                     </div>
@@ -533,15 +533,15 @@ const CreateJournalPage = () => {
                       name="content"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base font-semibold">Additional Details</FormLabel>
+                          <FormLabel className="text-base font-semibold text-gray-800">Additional Details</FormLabel>
                           <FormControl>
                             <Textarea 
                               placeholder="Add any additional information about your journal article" 
-                              className="min-h-24 resize-y bg-background/20 backdrop-blur-sm border-white/10"
+                              className="min-h-24 resize-y bg-white border-gray-200"
                               {...field} 
                             />
                           </FormControl>
-                          <FormDescription>
+                          <FormDescription className="text-gray-600">
                             Optional. Include any additional information that may be relevant.
                           </FormDescription>
                           <FormMessage />
@@ -553,35 +553,35 @@ const CreateJournalPage = () => {
                   {/* PDF Upload */}
                   <motion.div variants={itemVariants}>
                     <div className="space-y-2">
-                      <FormLabel className="text-base font-semibold">Upload PDF Document</FormLabel>
-                      <div className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors bg-background/30 backdrop-blur-sm
-                        ${pdfFile ? 'border-primary/50 bg-primary/5' : 'border-white/20 hover:border-primary/30 hover:bg-muted/50'} 
-                        ${pdfError ? 'border-destructive/50 bg-destructive/5' : ''}`}
+                      <FormLabel className="text-base font-semibold text-gray-800">Upload PDF Document</FormLabel>
+                      <div className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors bg-white
+                        ${pdfFile ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 hover:border-emerald-300 hover:bg-gray-50'} 
+                        ${pdfError ? 'border-red-300 bg-red-50' : ''}`}
                       >
                         {!pdfFile ? (
                           <div className="space-y-3">
-                            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                              <FileText className="h-6 w-6 text-primary" />
+                            <div className="mx-auto w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                              <FileText className="h-6 w-6 text-emerald-600" />
                             </div>
                             <div>
-                              <p className="text-base font-medium">Click to upload or drag and drop</p>
-                              <p className="text-sm text-muted-foreground">PDF (Max 10MB)</p>
+                              <p className="text-base font-medium text-gray-700">Click to upload or drag and drop</p>
+                              <p className="text-sm text-gray-500">PDF (Max 10MB)</p>
                             </div>
-                            <Button type="button" size="sm" variant="outline" className="bg-background/20 border-white/10">
+                            <Button type="button" size="sm" variant="outline" className="bg-white border-gray-200">
                               <Upload className="mr-2 h-4 w-4" />
                               Select PDF
                             </Button>
                           </div>
                         ) : (
                           <div className="space-y-3">
-                            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                              <FileText className="h-6 w-6 text-primary" />
+                            <div className="mx-auto w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                              <FileText className="h-6 w-6 text-emerald-600" />
                             </div>
-                            <p className="text-base font-medium">{pdfFile.name}</p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-base font-medium text-gray-700">{pdfFile.name}</p>
+                            <p className="text-sm text-gray-500">
                               {(pdfFile.size / (1024 * 1024)).toFixed(2)} MB
                             </p>
-                            <Button type="button" size="sm" variant="outline" onClick={() => setPdfFile(null)} className="bg-background/20 border-white/10">
+                            <Button type="button" size="sm" variant="outline" onClick={() => setPdfFile(null)} className="bg-white border-gray-200">
                               <X className="mr-2 h-4 w-4" />
                               Remove File
                             </Button>
@@ -596,9 +596,9 @@ const CreateJournalPage = () => {
                         />
                       </div>
                       {pdfError && (
-                        <p className="text-destructive text-sm">{pdfError}</p>
+                        <p className="text-red-500 text-sm">{pdfError}</p>
                       )}
-                      <FormDescription>
+                      <FormDescription className="text-gray-600">
                         Upload your full research paper as a PDF document.
                       </FormDescription>
                     </div>
@@ -607,23 +607,23 @@ const CreateJournalPage = () => {
                   {/* Thumbnail Upload - optional */}
                   <motion.div variants={itemVariants}>
                     <div className="space-y-2">
-                      <FormLabel className="text-base font-semibold">
+                      <FormLabel className="text-base font-semibold text-gray-800">
                         Thumbnail Image (Optional)
                       </FormLabel>
-                      <div className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors bg-background/30 backdrop-blur-sm
-                        ${thumbnailFile ? 'border-primary/50 bg-primary/5' : 'border-white/20 hover:border-primary/30 hover:bg-muted/50'} 
-                        ${thumbnailError ? 'border-destructive/50 bg-destructive/5' : ''}`}
+                      <div className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors bg-white
+                        ${thumbnailFile ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 hover:border-emerald-300 hover:bg-gray-50'} 
+                        ${thumbnailError ? 'border-red-300 bg-red-50' : ''}`}
                       >
                         {!thumbnailFile ? (
                           <div className="space-y-3">
-                            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                              <ImageIcon className="h-6 w-6 text-primary" />
+                            <div className="mx-auto w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                              <ImageIcon className="h-6 w-6 text-emerald-600" />
                             </div>
                             <div>
-                              <p className="text-base font-medium">Click to upload or drag and drop</p>
-                              <p className="text-sm text-muted-foreground">JPEG, PNG, WebP (Max 2MB)</p>
+                              <p className="text-base font-medium text-gray-700">Click to upload or drag and drop</p>
+                              <p className="text-sm text-gray-500">JPEG, PNG, WebP (Max 2MB)</p>
                             </div>
-                            <Button type="button" size="sm" variant="outline" className="bg-background/20 border-white/10">
+                            <Button type="button" size="sm" variant="outline" className="bg-white border-gray-200">
                               <Upload className="mr-2 h-4 w-4" />
                               Select Image
                             </Button>
@@ -637,11 +637,11 @@ const CreateJournalPage = () => {
                                 className="w-full h-full object-cover"
                               />
                             </div>
-                            <p className="text-base font-medium">{thumbnailFile.name}</p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-base font-medium text-gray-700">{thumbnailFile.name}</p>
+                            <p className="text-sm text-gray-500">
                               {(thumbnailFile.size / (1024 * 1024)).toFixed(2)} MB
                             </p>
-                            <Button type="button" size="sm" variant="outline" onClick={() => setThumbnailFile(null)} className="bg-background/20 border-white/10">
+                            <Button type="button" size="sm" variant="outline" onClick={() => setThumbnailFile(null)} className="bg-white border-gray-200">
                               <X className="mr-2 h-4 w-4" />
                               Remove Image
                             </Button>
@@ -656,9 +656,9 @@ const CreateJournalPage = () => {
                         />
                       </div>
                       {thumbnailError && (
-                        <p className="text-destructive text-sm">{thumbnailError}</p>
+                        <p className="text-red-500 text-sm">{thumbnailError}</p>
                       )}
-                      <FormDescription>
+                      <FormDescription className="text-gray-600">
                         Upload a cover image for your journal (recommended for better visibility).
                       </FormDescription>
                     </div>
@@ -671,13 +671,13 @@ const CreateJournalPage = () => {
                         type="button" 
                         variant="outline" 
                         onClick={() => router.push('/myjournals')}
-                        className="sm:order-1 bg-background/20 backdrop-blur-sm border-white/10"
+                        className="sm:order-1 border-emerald-200 text-emerald-700 hover:bg-emerald-50"
                       >
                         Cancel
                       </Button>
                       <Button 
                         type="submit" 
-                        className="gap-2 text-base py-6 bg-primary/90 hover:bg-primary/80"
+                        className="gap-2 text-base py-6 bg-emerald-600 hover:bg-emerald-700"
                         disabled={isSubmitting}
                       >
                         {isSubmitting ? (
@@ -700,7 +700,7 @@ const CreateJournalPage = () => {
                     <motion.div 
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive backdrop-blur-sm"
+                      className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-500"
                     >
                       <p>{error}</p>
                     </motion.div>
@@ -712,97 +712,96 @@ const CreateJournalPage = () => {
           
           <motion.div 
             variants={itemVariants}
-            className="rounded-xl border overflow-hidden p-6 h-fit sticky top-6 lg:col-span-1"
+            className="rounded-xl border border-emerald-100 overflow-hidden p-6 h-fit sticky top-6 lg:col-span-1 bg-white shadow-md"
             style={{
-              background: "linear-gradient(135deg, var(--gradient-start), var(--gradient-end))",
-              boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.07)",
+              background: "linear-gradient(135deg, #ffffff, #f0fdf4)",
             }}
           >
             {/* Hex grid pattern overlay */}
             <div className="absolute inset-0 opacity-10 pointer-events-none z-0"
               style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5.5l25 15v30l-25 15-25-15v-30z' stroke='%23a855f7' stroke-opacity='0.2' fill='none' stroke-width='0.5'/%3E%3C/svg%3E")`,
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5.5l25 15v30l-25 15-25-15v-30z' stroke='%2310b981' stroke-opacity='0.2' fill='none' stroke-width='0.5'/%3E%3C/svg%3E")`,
                 backgroundSize: '60px 60px'
               }}
             />
             
             {/* Small accent line at the top */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-primary/30"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500/30"></div>
             
             <div className="relative z-10">
-              <h3 className="text-2xl font-bold tracking-tight mb-4">
+              <h3 className="text-2xl font-bold tracking-tight text-gray-900 mb-4">
                 Journal Submission Guide
               </h3>
               
               <div className="space-y-6">
                 <div className="space-y-3">
-                  <h4 className="flex items-center gap-2 text-lg font-semibold text-purple-500">
-                    <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-purple-500/10">
+                  <h4 className="flex items-center gap-2 text-lg font-semibold text-emerald-700">
+                    <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-emerald-100">
                       1
                     </span>
                     Before Submission
                   </h4>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span>Ensure your title clearly represents your research findings</span>
+                      <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">Ensure your title clearly represents your research findings</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span>Write a concise yet comprehensive abstract (50-2000 characters)</span>
+                      <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">Write a concise yet comprehensive abstract (50-2000 characters)</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span>Select the appropriate category for better discoverability</span>
+                      <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">Select the appropriate category for better discoverability</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span>Add relevant tags to help readers find your work</span>
+                      <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">Add relevant tags to help readers find your work</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span>Upload your PDF document (required, max 10MB)</span>
+                      <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">Upload your PDF document (required, max 10MB)</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span>Add a thumbnail image for better visibility (optional)</span>
+                      <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">Add a thumbnail image for better visibility (optional)</span>
                     </li>
                   </ul>
                 </div>
                 
                 <div className="space-y-3">
-                  <h4 className="flex items-center gap-2 text-lg font-semibold text-emerald-500">
-                    <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-emerald-500/10">
+                  <h4 className="flex items-center gap-2 text-lg font-semibold text-emerald-700">
+                    <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-emerald-100">
                       2
                     </span>
                     After Submission
                   </h4>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-start gap-2">
-                      <ArrowRight className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
-                      <span>Your journal will be reviewed by our admin team</span>
+                      <ArrowRight className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">Your journal will be reviewed by our admin team</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <ArrowRight className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
-                      <span>You'll receive notification once reviewed</span>
+                      <ArrowRight className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">You'll receive notification once reviewed</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <ArrowRight className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
-                      <span>If approved, your journal will be publicly accessible</span>
+                      <ArrowRight className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">If approved, your journal will be publicly accessible</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <ArrowRight className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
-                      <span>You can track views, downloads, and comments</span>
+                      <ArrowRight className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">You can track views, downloads, and comments</span>
                     </li>
                   </ul>
                 </div>
                 
-                <div className="rounded-lg bg-background/10 backdrop-blur-sm p-4 border border-white/10">
+                <div className="rounded-lg bg-amber-50 p-4 border border-amber-200">
                   <div className="flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
                     <div>
-                      <h5 className="font-medium text-amber-500 mb-1">Important Note</h5>
-                      <p className="text-sm text-muted-foreground">
+                      <h5 className="font-medium text-amber-600 mb-1">Important Note</h5>
+                      <p className="text-sm text-amber-700">
                         Ensure that you have all necessary rights to publish the content and that it does not violate any copyright laws or academic ethics.
                       </p>
                     </div>

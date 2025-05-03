@@ -148,13 +148,13 @@ const JournalsContent = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900 text-white pt-16 sm:pt-20 md:pt-24 pb-12 sm:pb-16 md:pb-20">
+    <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-white text-gray-900 pt-16 sm:pt-20 md:pt-24 pb-12 sm:pb-16 md:pb-20">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         {/* Background decorative elements - only render on larger screens for performance */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none hidden sm:block">
           <motion.div 
-            className="absolute -top-40 -right-40 w-60 md:w-80 h-60 md:h-80 bg-purple-600/10 rounded-full blur-3xl"
+            className="absolute -top-40 -right-40 w-60 md:w-80 h-60 md:h-80 bg-emerald-500/10 rounded-full blur-3xl"
             animate={{ 
               x: [0, 20, 0],
               y: [0, -30, 0],
@@ -166,7 +166,7 @@ const JournalsContent = () => {
             }}
           />
           <motion.div 
-            className="absolute top-40 -left-40 w-60 md:w-80 h-60 md:h-80 bg-indigo-600/10 rounded-full blur-3xl"
+            className="absolute top-40 -left-40 w-60 md:w-80 h-60 md:h-80 bg-emerald-500/10 rounded-full blur-3xl"
             animate={{ 
               x: [0, -20, 0],
               y: [0, 30, 0],
@@ -186,10 +186,10 @@ const JournalsContent = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400 mb-4 sm:mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-emerald-500 mb-4 sm:mb-6">
               Explore Research Journals
             </h1>
-            <p className="text-base sm:text-lg text-white/80 mb-6 sm:mb-8 px-4">
+            <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 px-4">
               Discover cutting-edge research papers from leading academics and institutions around the world.
             </p>
             
@@ -199,11 +199,11 @@ const JournalsContent = () => {
                 id="search-input"
                 type="text"
                 placeholder="Search journals by title, author, or keywords..."
-                className="w-full py-2 sm:py-3 px-4 sm:px-5 bg-white/5 border-white/10 text-white placeholder:text-white/50 rounded-lg"
+                className="w-full py-2 sm:py-3 px-4 sm:px-5 bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 rounded-lg shadow-sm"
                 defaultValue={searchQuery}
                 aria-label="Search journals"
               />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50">
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
                 {isLoading ? (
                   <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -233,8 +233,8 @@ const JournalsContent = () => {
                     onClick={() => handleCategorySelect(category)}
                     className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm whitespace-nowrap transition-all ${
                       selectedCategory === category
-                        ? "bg-indigo-600 text-white"
-                        : "bg-white/5 text-white/70 hover:bg-white/10"
+                        ? "bg-emerald-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -257,7 +257,7 @@ const JournalsContent = () => {
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => handleVariantChange('featured')}
-                className={`p-1.5 sm:p-2 rounded-lg transition-colors ${displayVariant === 'featured' ? 'bg-indigo-600 text-white' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}
+                className={`p-1.5 sm:p-2 rounded-lg transition-colors ${displayVariant === 'featured' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                 title="Featured View"
                 aria-label="Switch to featured view"
               >
@@ -267,7 +267,7 @@ const JournalsContent = () => {
               </button>
               <button
                 onClick={() => handleVariantChange('default')}
-                className={`p-1.5 sm:p-2 rounded-lg transition-colors ${displayVariant === 'default' ? 'bg-indigo-600 text-white' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}
+                className={`p-1.5 sm:p-2 rounded-lg transition-colors ${displayVariant === 'default' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                 title="Grid View"
                 aria-label="Switch to grid view"
               >
@@ -288,8 +288,8 @@ const JournalsContent = () => {
               className="flex justify-center items-center py-20"
             >
               <div className="flex flex-col items-center">
-                <div className="w-12 h-12 border-4 border-white/10 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
-                <p className="text-white/70">Loading journals...</p>
+                <div className="w-12 h-12 border-4 border-emerald-200/20 border-t-emerald-600 rounded-full animate-spin mb-4"></div>
+                <p className="text-gray-600">Loading journals...</p>
               </div>
             </motion.div>
           ) : (
@@ -318,10 +318,10 @@ const JournalsContent = () => {
 const JournalsPage = () => {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-white text-gray-900 flex items-center justify-center">
         <div className="flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-white/10 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
-          <p className="text-white/70">Loading journals...</p>
+          <div className="w-12 h-12 border-4 border-emerald-200/20 border-t-emerald-600 rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-600">Loading journals...</p>
         </div>
       </div>
     }>

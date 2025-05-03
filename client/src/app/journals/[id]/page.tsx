@@ -362,10 +362,10 @@ const JournalDetailsPage = () => {
   const renderPreviewTab = () => (
     <TabsContent value="preview" className="pt-4 pb-8 px-0 focus-visible:outline-none focus-visible:ring-0">
       <div className="px-6 mb-6">
-        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-primary">
+        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-emerald-700">
           Document Preview
         </h2>
-        <p className="text-muted-foreground">Preview the first few pages of this journal article.</p>
+        <p className="text-gray-600">Preview the first few pages of this journal article.</p>
       </div>
       
       {/* PDF Preview */}
@@ -378,7 +378,7 @@ const JournalDetailsPage = () => {
                 size="sm"
                 onClick={handleDownload}
                 disabled={isDownloading}
-                className="bg-primary hover:bg-primary/90"
+                className="bg-emerald-600 hover:bg-emerald-700"
               >
                 {isDownloading ? (
                   <>
@@ -393,21 +393,21 @@ const JournalDetailsPage = () => {
                 )}
               </Button>
             </div>
-            <div className="border border-white/10 rounded-lg overflow-hidden">
+            <div className="border border-emerald-100 rounded-lg overflow-hidden">
               <PDFViewer url={currentJournal?.pdfUrl || ''} maxPages={3} />
             </div>
           </div>
         ) : (
-          <div className="h-[600px] bg-black/80 flex items-center justify-center">
-            <div className="text-center px-6 py-12 max-w-md rounded-lg border border-white/10 bg-background/40 backdrop-blur-lg">
-              <FileText className="h-12 w-12 mb-4 mx-auto text-primary opacity-80" />
-              <h3 className="text-xl font-bold mb-3">PDF Preview</h3>
-              <p className="text-sm text-muted-foreground mb-6">
+          <div className="h-[600px] bg-gray-50 flex items-center justify-center">
+            <div className="text-center px-6 py-12 max-w-md rounded-lg border border-emerald-100 bg-white shadow-sm">
+              <FileText className="h-12 w-12 mb-4 mx-auto text-emerald-600 opacity-80" />
+              <h3 className="text-xl font-bold mb-3 text-gray-900">PDF Preview</h3>
+              <p className="text-sm text-gray-600 mb-6">
                 No PDF file is available for preview. Please download the full document to view.
               </p>
               <Button 
                 onClick={handleDownload} 
-                className="bg-primary hover:bg-primary/90 gap-2"
+                className="bg-emerald-600 hover:bg-emerald-700 gap-2"
                 disabled={isDownloading}
               >
                 {isDownloading ? (
@@ -459,12 +459,12 @@ const JournalDetailsPage = () => {
   if (error || !currentJournal) {
     return (
       <div className="container max-w-6xl py-12 mx-auto">
-        <div className="bg-gradient-to-br from-background/80 to-background/40 backdrop-blur-sm border rounded-xl p-8 text-center shadow-lg">
-          <h2 className="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-500">Journal Not Found</h2>
-          <p className="mb-6 text-muted-foreground">
+        <div className="bg-gradient-to-br from-white to-emerald-50 backdrop-blur-sm border border-emerald-100 rounded-xl p-8 text-center shadow-lg">
+          <h2 className="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-emerald-500">Journal Not Found</h2>
+          <p className="mb-6 text-gray-600">
             {error || "The journal you're looking for doesn't exist or has been removed."}
           </p>
-          <Button onClick={() => router.push('/journals')} className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white">
+          <Button onClick={() => router.push('/journals')} className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white">
             Browse Journals
           </Button>
         </div>
@@ -496,7 +496,7 @@ const JournalDetailsPage = () => {
   
   // Main content when journal is loaded
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-white relative">
       {/* No custom background divs here - using globals.css background instead */}
       
       <motion.div 
@@ -506,16 +506,16 @@ const JournalDetailsPage = () => {
         animate="visible"
       >
         {/* Top Hero Section */}
-        <motion.div variants={itemVariants} className="relative overflow-hidden rounded-xl border border-white/10 bg-background/40 backdrop-blur-md p-6 md:p-10 shadow-lg">
+        <motion.div variants={itemVariants} className="relative overflow-hidden rounded-xl border border-emerald-100 bg-white shadow-lg p-6 md:p-10">
           {/* Category and Status */}
           <div className="flex flex-wrap gap-2 mb-4">
             {currentJournal.category && (
-              <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 border-primary/20 backdrop-blur-sm">
+              <Badge variant="outline" className="bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-700">
                 {currentJournal.category.name}
               </Badge>
             )}
             {getStatusBadge()}
-            <Badge variant="outline" className="bg-background/50 backdrop-blur-sm">
+            <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
               <Eye className="h-3 w-3 mr-1" /> {currentJournal.viewCount || 0} views
             </Badge>
           </div>
@@ -523,22 +523,22 @@ const JournalDetailsPage = () => {
           {/* Title and Author */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="md:col-span-3">
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-foreground">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-gray-900">
                 {currentJournal.title}
               </h1>
               
               <div className="flex items-center gap-3 mb-6">
-                <Avatar className="h-9 w-9 border border-white/10">
+                <Avatar className="h-9 w-9 border border-emerald-100">
                   <AvatarImage src={currentJournal.author?.profileImage || ''} alt={currentJournal.author?.name || 'Author'} />
-                  <AvatarFallback className="bg-primary/10 text-primary">
+                  <AvatarFallback className="bg-emerald-100 text-emerald-600">
                     {currentJournal.author?.name?.charAt(0) || 'A'}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <Link href={`/authors/${currentJournal.authorId}`} className="font-medium hover:text-primary transition-colors">
+                  <Link href={`/authors/${currentJournal.authorId}`} className="font-medium hover:text-emerald-600 transition-colors">
                     {currentJournal.author?.name || 'Anonymous'}
                   </Link>
-                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                  <p className="text-sm text-gray-600 flex items-center gap-1">
                     <Calendar className="h-3 w-3" /> {formatDate(currentJournal.publicationDate || currentJournal.createdAt)}
                   </p>
                 </div>
@@ -549,7 +549,7 @@ const JournalDetailsPage = () => {
             <div className="md:col-span-1 flex md:justify-end items-start gap-2 md:gap-3">
               <Button 
                 onClick={handleDownload} 
-                className="flex-1 md:flex-none bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
+                className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
                 size="lg"
               >
                 <Download className="h-5 w-5" />
@@ -559,11 +559,11 @@ const JournalDetailsPage = () => {
               </Button>
               
               <div className="flex gap-2">
-                <Button variant="outline" size="icon" className="rounded-full border-white/10 bg-background/50 backdrop-blur-sm"
+                <Button variant="outline" size="icon" className="rounded-full border-gray-200 bg-white"
                   onClick={() => setIsBookmarked(!isBookmarked)}>
-                  <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-primary text-primary' : ''}`} />
+                  <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-emerald-600 text-emerald-600' : ''}`} />
                 </Button>
-                <Button variant="outline" size="icon" className="rounded-full border-white/10 bg-background/50 backdrop-blur-sm"
+                <Button variant="outline" size="icon" className="rounded-full border-gray-200 bg-white"
                   onClick={() => setIsLiked(!isLiked)}>
                   <Heart className={`h-4 w-4 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
                 </Button>
@@ -578,7 +578,7 @@ const JournalDetailsPage = () => {
           <motion.div variants={itemVariants} className="lg:col-span-2 space-y-8">
             {/* Journal Cover/Preview */}
             {currentJournal.thumbnailUrl && (
-              <div className="overflow-hidden rounded-xl border border-white/10 shadow-lg">
+              <div className="overflow-hidden rounded-xl border border-emerald-100 shadow-lg">
                 <div className="relative h-72 sm:h-96 w-full">
                   <Image 
                     src={currentJournal.thumbnailUrl} 
@@ -607,13 +607,13 @@ const JournalDetailsPage = () => {
             )}
             
             {/* Content Tabs */}
-            <div className="bg-background/40 backdrop-blur-md rounded-xl border border-white/10 overflow-hidden shadow-lg">
+            <div className="bg-white rounded-xl border border-emerald-100 overflow-hidden shadow-lg">
               <Tabs defaultValue="abstract" className="w-full" onValueChange={setActiveTab}>
-                <div className="border-b border-white/10">
+                <div className="border-b border-emerald-100">
                   <TabsList className="p-0 bg-transparent h-14 w-full flex justify-start rounded-none">
                     <TabsTrigger 
                       value="abstract" 
-                      className="flex-1 data-[state=active]:bg-background/60 data-[state=active]:shadow-none rounded-none h-full"
+                      className="flex-1 data-[state=active]:bg-emerald-50 data-[state=active]:shadow-none rounded-none h-full text-gray-700 data-[state=active]:text-emerald-700"
                     >
                       <BookOpen className="h-4 w-4 mr-2" />
                       Abstract
@@ -621,7 +621,7 @@ const JournalDetailsPage = () => {
                     
                     <TabsTrigger 
                       value="preview" 
-                      className="flex-1 data-[state=active]:bg-background/60 data-[state=active]:shadow-none rounded-none h-full"
+                      className="flex-1 data-[state=active]:bg-emerald-50 data-[state=active]:shadow-none rounded-none h-full text-gray-700 data-[state=active]:text-emerald-700"
                     >
                       <FileText className="h-4 w-4 mr-2" />
                       Preview
@@ -629,7 +629,7 @@ const JournalDetailsPage = () => {
                     
                     <TabsTrigger 
                       value="citation" 
-                      className="flex-1 data-[state=active]:bg-background/60 data-[state=active]:shadow-none rounded-none h-full"
+                      className="flex-1 data-[state=active]:bg-emerald-50 data-[state=active]:shadow-none rounded-none h-full text-gray-700 data-[state=active]:text-emerald-700"
                     >
                       <Award className="h-4 w-4 mr-2" />
                       Citation
@@ -641,11 +641,11 @@ const JournalDetailsPage = () => {
                   <div className="space-y-6">
                     {/* Abstract Section */}
                     <div>
-                      <h2 className="text-2xl font-bold mb-5 flex items-center gap-2 text-primary">
+                      <h2 className="text-2xl font-bold mb-5 flex items-center gap-2 text-emerald-700">
                         Abstract
                       </h2>
-                      <div className="prose prose-blue dark:prose-invert max-w-none">
-                        <p className="text-foreground/90">
+                      <div className="prose prose-emerald max-w-none">
+                        <p className="text-gray-700">
                           {showFullAbstract 
                             ? currentJournal.abstract 
                             : truncateText(currentJournal.abstract, 500)}
@@ -654,7 +654,7 @@ const JournalDetailsPage = () => {
                           <Button 
                             variant="link" 
                             onClick={() => setShowFullAbstract(!showFullAbstract)}
-                            className="px-0 mt-2 text-primary"
+                            className="px-0 mt-2 text-emerald-600"
                           >
                             {showFullAbstract ? 'Show less' : 'Read more'}
                           </Button>
@@ -665,13 +665,13 @@ const JournalDetailsPage = () => {
                     {/* Keywords/Tags Section */}
                     {currentJournal.tags && currentJournal.tags.length > 0 && (
                       <div>
-                        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-primary">
+                        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-emerald-700">
                           <Tag className="h-4 w-4" />
                           Keywords
                         </h3>
                         <div className="flex flex-wrap gap-2">
                           {currentJournal.tags.map((tagItem) => (
-                            <Badge key={tagItem.tag.id} variant="secondary" className="px-3 py-1.5 bg-background/40 backdrop-blur-sm border border-white/10 hover:bg-background/60">
+                            <Badge key={tagItem.tag.id} variant="secondary" className="px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 border-0">
                               #{tagItem.tag.name}
                             </Badge>
                           ))}
@@ -682,12 +682,12 @@ const JournalDetailsPage = () => {
                     {/* Additional content section if available */}
                     {currentJournal.content && (
                       <div>
-                        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-primary">
+                        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-emerald-700">
                           <MessageSquare className="h-4 w-4" />
                           Additional Content
                         </h3>
-                        <div className="prose prose-blue dark:prose-invert max-w-none">
-                          <p className="text-foreground/90">{currentJournal.content}</p>
+                        <div className="prose prose-emerald max-w-none">
+                          <p className="text-gray-700">{currentJournal.content}</p>
                         </div>
                       </div>
                     )}
@@ -699,15 +699,15 @@ const JournalDetailsPage = () => {
                 
                 <TabsContent value="citation" className="p-6 focus-visible:outline-none focus-visible:ring-0">
                   <div className="space-y-6">
-                    <h2 className="text-2xl font-bold mb-5 flex items-center gap-2 text-primary">
+                    <h2 className="text-2xl font-bold mb-5 flex items-center gap-2 text-emerald-700">
                       Citation Information
                     </h2>
                     
                     {/* Citation format selector */}
-                    <div className="bg-background/30 border border-white/10 rounded-lg p-6 backdrop-blur-sm">
+                    <div className="bg-gray-50 border border-emerald-100 rounded-lg p-6">
                       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                         <Tabs defaultValue="apa" onValueChange={(value) => setSelectedCitation(value)} className="w-full sm:w-auto">
-                          <TabsList className="bg-background/50 border border-white/10">
+                          <TabsList className="bg-white border border-emerald-100">
                             <TabsTrigger value="apa">APA</TabsTrigger>
                             <TabsTrigger value="mla">MLA</TabsTrigger>
                             <TabsTrigger value="chicago">Chicago</TabsTrigger>
@@ -717,7 +717,7 @@ const JournalDetailsPage = () => {
                           variant="outline" 
                           size="sm" 
                           onClick={copyCitation}
-                          className="gap-2 ml-auto"
+                          className="gap-2 ml-auto border-emerald-200 text-emerald-700 hover:bg-emerald-50"
                         >
                           <Copy className="h-4 w-4" />
                           Copy Citation
@@ -725,10 +725,10 @@ const JournalDetailsPage = () => {
                       </div>
                       
                       <div className="relative">
-                        <div className="p-4 bg-background/20 rounded-lg border border-white/10 font-mono text-sm break-all">
+                        <div className="p-4 bg-white rounded-lg border border-emerald-100 font-mono text-sm break-all text-gray-800">
                           {citationStyles[selectedCitation as keyof typeof citationStyles](currentJournal)}
                         </div>
-                        <div className="absolute -top-2 -right-2 h-6 w-6 bg-background rounded-full flex items-center justify-center border border-white/10 text-xs font-medium">
+                        <div className="absolute -top-2 -right-2 h-6 w-6 bg-emerald-500 rounded-full flex items-center justify-center border border-white text-white text-xs font-medium">
                           {selectedCitation.charAt(0).toUpperCase()}
                         </div>
                       </div>
@@ -736,9 +736,9 @@ const JournalDetailsPage = () => {
                       {/* DOI information if available */}
                       {currentJournal.doi && (
                         <div className="mt-6 flex items-center gap-3 text-sm">
-                          <Badge variant="outline" className="bg-primary/10 text-primary">DOI</Badge>
-                          <code className="font-mono">{currentJournal.doi}</code>
-                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-full" 
+                          <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">DOI</Badge>
+                          <code className="font-mono text-gray-700">{currentJournal.doi}</code>
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-full text-emerald-600 hover:bg-emerald-50" 
                             onClick={() => {
                               navigator.clipboard.writeText(currentJournal.doi || '');
                               toast.success('DOI copied to clipboard');
@@ -758,45 +758,45 @@ const JournalDetailsPage = () => {
           <div className="space-y-6">
             {/* Quick Metadata Card */}
             <motion.div variants={itemVariants}>
-              <Card className="overflow-hidden border-white/10 bg-background/40 backdrop-blur-lg shadow-lg">
-                <CardHeader className="border-b border-white/10 bg-background/30 px-5 py-4">
-                  <CardTitle className="text-lg font-semibold text-primary">
+              <Card className="overflow-hidden border-emerald-100 bg-white shadow-lg">
+                <CardHeader className="border-b border-emerald-100 bg-emerald-50 px-5 py-4">
+                  <CardTitle className="text-lg font-semibold text-emerald-700">
                     Journal Information
                   </CardTitle>
                 </CardHeader>
                 
                 <CardContent className="p-5 space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <Calendar className="h-5 w-5 text-primary" />
+                    <div className="h-9 w-9 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <Calendar className="h-5 w-5 text-emerald-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Publication Date</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm font-medium text-gray-900">Publication Date</p>
+                      <p className="text-sm text-gray-600">
                         {formatDate(currentJournal.publicationDate || currentJournal.createdAt)}
                       </p>
                     </div>
                   </div>
                   
                   <div className="flex items-start gap-3">
-                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <FileText className="h-5 w-5 text-primary" />
+                    <div className="h-9 w-9 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <FileText className="h-5 w-5 text-emerald-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">File Details</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm font-medium text-gray-900">File Details</p>
+                      <p className="text-sm text-gray-600">
                         PDF • {currentJournal.pageCount ? `${currentJournal.pageCount} pages` : 'Full document'}
                       </p>
                     </div>
                   </div>
                   
                   <div className="flex items-start gap-3">
-                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <Eye className="h-5 w-5 text-primary" />
+                    <div className="h-9 w-9 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <Eye className="h-5 w-5 text-emerald-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Metrics</p>
-                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                      <p className="text-sm font-medium text-gray-900">Metrics</p>
+                      <div className="flex items-center gap-3 text-sm text-gray-600">
                         <span className="flex items-center gap-1">
                           <Eye className="h-3.5 w-3.5" /> {currentJournal.viewCount || 0}
                         </span>
@@ -809,12 +809,12 @@ const JournalDetailsPage = () => {
                   
                   {currentJournal.doi && (
                     <div className="flex items-start gap-3">
-                      <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                        <Link2 className="h-5 w-5 text-primary" />
+                      <div className="h-9 w-9 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+                        <Link2 className="h-5 w-5 text-emerald-600" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium">DOI</p>
-                        <p className="text-sm text-muted-foreground font-mono break-all">
+                        <p className="text-sm font-medium text-gray-900">DOI</p>
+                        <p className="text-sm text-gray-600 font-mono break-all">
                           {currentJournal.doi}
                         </p>
                       </div>
@@ -822,10 +822,10 @@ const JournalDetailsPage = () => {
                   )}
                 </CardContent>
                 
-                <CardFooter className="px-5 py-4 border-t border-white/10 bg-background/20">
+                <CardFooter className="px-5 py-4 border-t border-emerald-100 bg-emerald-50">
                   <Button 
                     onClick={handleDownload} 
-                    className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+                    className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
                     disabled={isDownloading}
                   >
                     {isDownloading ? (
@@ -848,25 +848,25 @@ const JournalDetailsPage = () => {
             
             {/* Author Information */}
             <motion.div variants={itemVariants}>
-              <Card className="overflow-hidden border-white/10 bg-background/40 backdrop-blur-lg shadow-lg">
-                <CardHeader className="border-b border-white/10 bg-background/30 px-5 py-4">
-                  <CardTitle className="text-lg font-semibold text-primary">
+              <Card className="overflow-hidden border-emerald-100 bg-white shadow-lg">
+                <CardHeader className="border-b border-emerald-100 bg-emerald-50 px-5 py-4">
+                  <CardTitle className="text-lg font-semibold text-emerald-700">
                     Author
                   </CardTitle>
                 </CardHeader>
                 
                 <CardContent className="p-5">
                   <div className="flex items-center gap-4 mb-4">
-                    <Avatar className="h-16 w-16 border border-white/10 shadow-md">
+                    <Avatar className="h-16 w-16 border border-emerald-100 shadow-md">
                       <AvatarImage src={currentJournal.author?.profileImage || ''} alt={currentJournal.author?.name || 'Author'} />
-                      <AvatarFallback className="text-xl font-semibold bg-primary/20 text-primary">
+                      <AvatarFallback className="text-xl font-semibold bg-emerald-100 text-emerald-600">
                         {currentJournal.author?.name?.charAt(0) || 'A'}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="font-semibold text-lg">{currentJournal.author?.name || 'Anonymous'}</h3>
+                      <h3 className="font-semibold text-lg text-gray-900">{currentJournal.author?.name || 'Anonymous'}</h3>
                       {currentJournal.author?.institution && (
-                        <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                        <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
                           <Building className="h-3.5 w-3.5" />
                           {currentJournal.author.institution}
                         </p>
@@ -876,20 +876,20 @@ const JournalDetailsPage = () => {
                   
                   {currentJournal.author?.bio && (
                     <div className="mb-4">
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-gray-600">
                         {truncateText(currentJournal.author.bio, 150)}
                       </p>
                     </div>
                   )}
                   
                   <div className="mt-4 space-y-2">
-                    <Button variant="outline" className="w-full gap-2 border-white/10 bg-background/30 hover:bg-background/50" asChild>
+                    <Button variant="outline" className="w-full gap-2 border-emerald-200 bg-white hover:bg-emerald-50 text-emerald-700" asChild>
                       <Link href={`/authors/${currentJournal.authorId}`}>
                         <User className="h-4 w-4" />
                         View Profile
                       </Link>
                     </Button>
-                    <Button variant="outline" className="w-full gap-2 border-white/10 bg-background/30 hover:bg-background/50" asChild>
+                    <Button variant="outline" className="w-full gap-2 border-emerald-200 bg-white hover:bg-emerald-50 text-emerald-700" asChild>
                       <Link href={`/journals?author=${currentJournal.authorId}`}>
                         <FileText className="h-4 w-4" />
                         More Publications
@@ -904,7 +904,7 @@ const JournalDetailsPage = () => {
             <motion.div variants={itemVariants}>
               <Button 
                 variant="ghost" 
-                className="w-full gap-2 text-muted-foreground hover:text-foreground/80 hover:bg-background/40" 
+                className="w-full gap-2 text-gray-500 hover:text-gray-700 hover:bg-emerald-50" 
                 size="sm"
                 onClick={reportIssue}
               >
@@ -919,8 +919,8 @@ const JournalDetailsPage = () => {
         {relatedJournals.length > 0 && (
           <motion.div variants={itemVariants} className="pt-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-primary">Related Journals</h2>
-              <Button variant="ghost" size="sm" className="gap-1" asChild>
+              <h2 className="text-2xl font-bold text-emerald-700">Related Journals</h2>
+              <Button variant="ghost" size="sm" className="gap-1 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50" asChild>
                 <Link href={`/journals?category=${currentJournal.categoryId}`}>
                   View All <ChevronRight className="h-4 w-4" />
                 </Link>
@@ -929,7 +929,7 @@ const JournalDetailsPage = () => {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {relatedJournals.map((journal) => (
-                <Card key={journal.id} className="group overflow-hidden border-white/10 bg-background/40 backdrop-blur-lg shadow-md hover:shadow-lg transition-all duration-300">
+                <Card key={journal.id} className="group overflow-hidden border-emerald-100 bg-white shadow-md hover:shadow-lg transition-all duration-300">
                   <Link href={`/journals/${journal.id}`} className="block h-full">
                     {journal.thumbnailUrl && (
                       <div className="relative h-32 w-full overflow-hidden">
@@ -939,18 +939,18 @@ const JournalDetailsPage = () => {
                           fill
                           className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                       </div>
                     )}
                     <CardHeader className={`px-4 py-3 ${journal.thumbnailUrl ? 'pt-2' : 'pt-4'}`}>
-                      <CardTitle className="text-base line-clamp-2 group-hover:text-primary transition-colors">
+                      <CardTitle className="text-base line-clamp-2 text-gray-900 group-hover:text-emerald-600 transition-colors">
                         {journal.title}
                       </CardTitle>
-                      <CardDescription className="line-clamp-2 text-xs mt-1">
+                      <CardDescription className="line-clamp-2 text-xs mt-1 text-gray-600">
                         {truncateText(journal.abstract, 100)}
                       </CardDescription>
                     </CardHeader>
-                    <CardFooter className="p-4 pt-0 text-xs text-muted-foreground border-t border-white/5 flex justify-between">
+                    <CardFooter className="p-4 pt-0 text-xs text-gray-500 border-t border-emerald-50 flex justify-between">
                       <span className="flex items-center gap-1">
                         <User className="h-3 w-3" /> {journal.author?.name || 'Anonymous'}
                       </span>
@@ -963,14 +963,14 @@ const JournalDetailsPage = () => {
               ))}
               
               {relatedJournals.length < 3 && Array.from({ length: 3 - relatedJournals.length }).map((_, index) => (
-                <Card key={`suggestion-${index}`} className="group overflow-hidden border-white/10 border-dashed bg-background/20 shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center">
+                <Card key={`suggestion-${index}`} className="group overflow-hidden border-emerald-100 border-dashed bg-emerald-50/50 shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center">
                   <div className="text-center p-6">
-                    <div className="h-12 w-12 rounded-full bg-background/40 flex items-center justify-center mx-auto mb-3">
-                      <Plus className="h-6 w-6 text-muted-foreground" />
+                    <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center mx-auto mb-3 shadow-sm">
+                      <Plus className="h-6 w-6 text-emerald-500" />
                     </div>
-                    <h3 className="font-medium text-muted-foreground">Discover More</h3>
-                    <p className="text-xs text-muted-foreground/70 mt-1">Explore similar research in this field</p>
-                    <Button variant="ghost" size="sm" className="mt-3" asChild>
+                    <h3 className="font-medium text-gray-700">Discover More</h3>
+                    <p className="text-xs text-gray-500 mt-1">Explore similar research in this field</p>
+                    <Button variant="ghost" size="sm" className="mt-3 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50" asChild>
                       <Link href="/journals">Browse Journals</Link>
                     </Button>
                   </div>

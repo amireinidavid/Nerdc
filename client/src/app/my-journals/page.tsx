@@ -93,7 +93,7 @@ const MyJournalsPage = () => {
   if (!isClient || authLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-600"></div>
       </div>
     );
   }
@@ -101,7 +101,7 @@ const MyJournalsPage = () => {
   // If not authenticated, show access denied screen
   if (!user) {
     return (
-      <div className="flex flex-col justify-center items-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4">
+      <div className="flex flex-col justify-center items-center min-h-screen bg-gradient-to-b from-emerald-50 to-white px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -188,7 +188,7 @@ const MyJournalsPage = () => {
           >
             <Link 
               href="/login" 
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
             >
               Log In Now
             </Link>
@@ -208,23 +208,23 @@ const MyJournalsPage = () => {
 
   // Authenticated user view
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-900 to-gray-900">
+    <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Page header with stats */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-8 shadow-xl border border-white/20"
+          className="bg-white rounded-2xl p-6 mb-8 shadow-lg border border-emerald-100"
         >
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-extrabold text-white mb-2">My Research Papers</h1>
-              <p className="text-indigo-200 text-lg">Manage and track your academic publications</p>
+              <h1 className="text-4xl font-extrabold text-gray-900 mb-2">My Research Papers</h1>
+              <p className="text-gray-600 text-lg">Manage and track your academic publications</p>
             </div>
             <Link
               href="/my-journals/create"
-              className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg hover:shadow-indigo-500/30 transition-all duration-200"
+              className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg hover:shadow-emerald-500/20 transition-all duration-200"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
@@ -246,13 +246,13 @@ const MyJournalsPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 shadow-lg"
+                className="bg-emerald-50 rounded-xl p-4 border border-emerald-100 shadow-md"
               >
                 <div className="flex items-center">
                   <div className="text-3xl mr-4">{stat.icon}</div>
                   <div>
-                    <div className="text-indigo-200 font-medium">{stat.label}</div>
-                    <div className="text-2xl font-bold text-white">{stat.value}</div>
+                    <div className="text-emerald-700 font-medium">{stat.label}</div>
+                    <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
                   </div>
                 </div>
               </motion.div>
@@ -267,7 +267,7 @@ const MyJournalsPage = () => {
           transition={{ duration: 0.4, delay: 0.2 }}
           className="mb-8"
         >
-          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-white/5 p-4 rounded-xl backdrop-blur-sm border border-white/10">
+          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-white p-4 rounded-xl shadow-md border border-emerald-100">
             {/* Status filters */}
             <div className="flex items-center space-x-2 overflow-x-auto pb-2 lg:pb-0 w-full lg:w-auto">
               {statusFilters.map((filter, index) => (
@@ -276,8 +276,8 @@ const MyJournalsPage = () => {
                   onClick={() => setActiveFilter(filter.value)}
                   className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
                     activeFilter === filter.value
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
-                      : 'bg-white/10 text-indigo-200 hover:bg-white/20'
+                      ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
                   {filter.label}
@@ -292,10 +292,10 @@ const MyJournalsPage = () => {
                 placeholder="Search papers..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full py-2 pl-10 pr-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full py-2 pl-10 pr-4 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <svg className="w-5 h-5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
               </div>
@@ -311,7 +311,7 @@ const MyJournalsPage = () => {
         >
           {journalsLoading ? (
             <div className="flex justify-center my-16">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-400"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-600"></div>
             </div>
           ) : (
             <JournalsList 
@@ -328,13 +328,13 @@ const MyJournalsPage = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center py-16 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10 shadow-xl"
+            className="text-center py-16 bg-white rounded-xl border border-emerald-100 shadow-md"
           >
-            <svg className="h-20 w-20 text-indigo-300 mx-auto mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="h-20 w-20 text-emerald-500 mx-auto mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
             </svg>
-            <h3 className="text-2xl font-bold text-white mb-2">No journals found</h3>
-            <p className="text-indigo-200 max-w-md mx-auto mb-6">
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">No journals found</h3>
+            <p className="text-gray-600 max-w-md mx-auto mb-6">
               {activeFilter !== "all" || searchQuery
                 ? "Try adjusting your search or filters"
                 : "Start your research journey by submitting your first paper"}
@@ -342,7 +342,7 @@ const MyJournalsPage = () => {
             {activeFilter === "all" && !searchQuery && (
               <Link 
                 href="/myjournals/create"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-lg shadow-indigo-500/20 text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200"
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-lg shadow-emerald-500/10 text-white bg-emerald-600 hover:bg-emerald-700 transition-colors duration-200"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />

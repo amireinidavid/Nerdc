@@ -67,6 +67,9 @@ export function Header() {
       }
     };
     
+    // Also handle initial scroll state
+    setScrolled(window.scrollY > 10);
+    
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -101,7 +104,7 @@ export function Header() {
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 safe-top ${
-        scrolled ? "bg-white/80 backdrop-blur-lg shadow-sm py-3" : "bg-transparent py-5"
+        scrolled || isOpen ? "bg-white shadow-sm py-3" : "bg-transparent py-5"
       } ${isAdmin() ? "border-b border-emerald-800/10" : ""}`}
     >
       <Container className="flex items-center justify-between">
@@ -262,32 +265,13 @@ export function Header() {
 
         {/* Mobile Menu - Fixed and sticky */}
         <div
-          className={`fixed inset-0 bg-white z-40 transition-all duration-300 ease-in-out lg:hidden ${
+          className={`fixed inset-0 bg-white z-40 transition-all duration-300 ease-in-out lg:hidden flex flex-col ${
             isOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
           }`}
+          style={{ top: "0", paddingTop: "4.5rem" }}
           aria-hidden={!isOpen}
         >
-          {/* <div className="sticky top-0 left-0 right-0 h-20 px-4 flex items-center justify-between border-b border-gray-100">
-            <div className="flex items-center">
-              <div className="h-10 w-10 relative overflow-hidden rounded-lg flex items-center justify-center shrink-0">
-                <Image 
-                  src="/assets/logo.jpg" 
-                  alt="NERDC Logo" 
-                  width={40} 
-                  height={40} 
-                  className="object-cover"
-                />
-              </div>
-              <div className="ml-3">
-                <div className="font-bold text-base text-gray-800 tracking-tight">
-                  <span className="inline-block">NERDC</span> <span className="text-emerald-600">Journal</span>
-                  {isAdmin() && <span className="ml-1 text-xs bg-emerald-600 text-white px-1.5 py-0.5 rounded-full">Admin</span>}
-                </div>
-              </div>
-            </div>
-          </div> */}
-
-          <div className="h-[calc(100%-5rem)] overflow-y-auto py-6 px-6">
+          <div className="flex-1 h-full overflow-y-auto pb-6 px-6">
             {/* User info at top if logged in */}
             {user && (
               <div className="mb-8">

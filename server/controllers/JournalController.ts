@@ -317,17 +317,12 @@ export const createJournal = async (req: Request, res: Response): Promise<void> 
 // Get all journals with filtering and visibility control
 export const getJournals = async (req: Request, res: Response):Promise<void> => {
   try {
-    const userId = req.user?.id;
-    const userRole = req.user?.role;
-    
     // Parse query parameters
     const { 
       page = 1, 
       limit = 10,
       category,
-      status,
       search,
-      authorId,
       tags,
       sortBy = "createdAt",
       sortOrder = "desc"
@@ -337,42 +332,15 @@ export const getJournals = async (req: Request, res: Response):Promise<void> => 
     const pageSize = parseInt(limit as string, 10);
     const skip = (pageNumber - 1) * pageSize;
 
-    // Build filters
-    let whereClause: Prisma.JournalWhereInput = {};
-
-    // If not admin or author, only show published journals
-    if (!userRole || (userRole !== UserRole.ADMIN && userRole !== UserRole.AUTHOR)) {
-      whereClause = {
-        ...whereClause,
-        isPublished: true,
-        reviewStatus: ReviewStatus.PUBLISHED,
-      };
-    } else if (userRole === UserRole.AUTHOR && authorId !== userId) {
-      // Authors can see their own drafts and all published
-      whereClause = {
-        ...whereClause,
-        OR: [
-          { authorId: userId },
-          { 
-            isPublished: true,
-            reviewStatus: ReviewStatus.PUBLISHED
-          }
-        ]
-      };
-    }
+    // Build filters - only show published journals
+    let whereClause: Prisma.JournalWhereInput = {
+      isPublished: true,
+      reviewStatus: ReviewStatus.PUBLISHED,
+    };
 
     // Apply additional filters
     if (category) {
       whereClause.categoryId = parseInt(category as string, 10);
-    }
-
-    if (status && (userRole === UserRole.ADMIN || 
-                  (userRole === UserRole.AUTHOR && authorId === userId))) {
-      whereClause.reviewStatus = status as ReviewStatus;
-    }
-
-    if (authorId) {
-      whereClause.authorId = parseInt(authorId as string, 10);
     }
 
     if (search) {
@@ -398,16 +366,26 @@ export const getJournals = async (req: Request, res: Response):Promise<void> => 
       };
     }
 
-    // Determine sort direction
-    const orderBy = {
-      [sortBy as string]: sortOrder === "asc" ? "asc" : "desc"
-    };
-
     // Get total count for pagination
-    const totalCount = await prisma.journal.count({ where: whereClause });
+    const totalCount = await prisma.journal.count({
+      where: whereClause,
+    });
+
+    // Determine ordering - use random ordering if no specific sort is requested
+    let orderBy = {};
+    if (sortBy === "random") {
+      // Random ordering using Prisma's random() function
+      orderBy = {
+        id: 'asc', // Default ordering that will be randomized by the subsequent code
+      };
+    } else {
+      orderBy = {
+        [sortBy as string]: sortOrder === "asc" ? "asc" : "desc"
+      };
+    }
 
     // Get journals
-    const journals = await prisma.journal.findMany({
+    let journals = await prisma.journal.findMany({
       where: whereClause,
       skip,
       take: pageSize,
@@ -418,6 +396,7 @@ export const getJournals = async (req: Request, res: Response):Promise<void> => 
             id: true,
             name: true,
             institution: true,
+            profileImage: true,
           },
         },
         category: true,
@@ -429,7 +408,12 @@ export const getJournals = async (req: Request, res: Response):Promise<void> => 
       },
     });
 
-     res.status(200).json({
+    // If random sort was requested, shuffle the results
+    if (sortBy === "random") {
+      journals = journals.sort(() => Math.random() - 0.5);
+    }
+
+    res.status(200).json({
       success: true,
       data: journals,
       pagination: {
@@ -442,7 +426,7 @@ export const getJournals = async (req: Request, res: Response):Promise<void> => 
     });
   } catch (error) {
     console.error("Error getting journals:", error);
-     res.status(500).json({
+    res.status(500).json({
       success: false,
       message: "Failed to get journals",
       error: error instanceof Error ? error.message : "Unknown error",

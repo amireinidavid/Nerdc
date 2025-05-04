@@ -135,6 +135,20 @@ const useProfileStore = create<ProfileState>()((set, get) => ({
       const response = await profileAPI.completeProfile(dataToSend);
       const updatedProfile = response.data.data;
       
+      // Check if new tokens were returned (happens when changing to AUTHOR role)
+      if (updatedProfile.tokens) {
+        console.log("Received new tokens after role update");
+        
+        // Store the new tokens in localStorage
+        if (updatedProfile.tokens.accessToken) {
+          localStorage.setItem('accessToken', updatedProfile.tokens.accessToken);
+        }
+        
+        if (updatedProfile.tokens.refreshToken) {
+          localStorage.setItem('refreshToken', updatedProfile.tokens.refreshToken);
+        }
+      }
+      
       // Update auth store with the updated user data
       useAuthStore.setState({ 
         user: updatedProfile,
@@ -185,6 +199,20 @@ const useProfileStore = create<ProfileState>()((set, get) => ({
       
       const response = await profileAPI.toggleResearcherStatus(researcherData);
       const updatedProfile = response.data.data;
+      
+      // Check if new tokens were returned (happens when changing roles)
+      if (updatedProfile.tokens) {
+        console.log("Received new tokens after role update");
+        
+        // Store the new tokens in localStorage
+        if (updatedProfile.tokens.accessToken) {
+          localStorage.setItem('accessToken', updatedProfile.tokens.accessToken);
+        }
+        
+        if (updatedProfile.tokens.refreshToken) {
+          localStorage.setItem('refreshToken', updatedProfile.tokens.refreshToken);
+        }
+      }
       
       // Update auth store with the updated user data (role will change)
       useAuthStore.setState({ user: updatedProfile });

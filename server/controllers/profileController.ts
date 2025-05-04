@@ -3,6 +3,16 @@ import { Request, Response } from "express";
 
 const prisma = new PrismaClient();
 
+// Interface for the response with optional tokens
+interface UserResponse {
+  id: number;
+  email: string;
+  name: string | null;
+  role: UserRole;
+  profileStatus: string;
+  [key: string]: any; // Allow additional properties like tokens
+}
+
 /**
  * Get current user's profile
  */
@@ -137,6 +147,34 @@ export const completeProfile = async (req: Request, res: Response) => {
 
     // Return updated user without password
     const { password: _, ...userWithoutPassword } = updatedUser;
+
+    // Generate new tokens if the user's role was changed to AUTHOR
+    if (isResearcher) {
+      // Import the function to generate tokens and set cookies
+      const { generateTokens, setAuthCookies } = require('../controllers/authController');
+      
+      // Generate new tokens with the updated role
+      const { accessToken, refreshToken } = generateTokens(updatedUser.id, updatedUser.role);
+      
+      // Set the new cookies
+      setAuthCookies(res, accessToken, refreshToken);
+      
+      // Also include the tokens in the response body for frontend to update
+      const responseWithTokens = {
+        ...userWithoutPassword,
+        tokens: {
+          accessToken,
+          refreshToken
+        }
+      };
+      
+      res.status(200).json({
+        success: true,
+        message: "Profile completed successfully",
+        data: responseWithTokens,
+      });
+      return;
+    }
 
     res.status(200).json({
       success: true,
@@ -313,10 +351,26 @@ export const toggleResearcherStatus = async (req: Request, res: Response) => {
       // Return updated user without password
       const { password: _, ...userWithoutPassword } = updatedUser;
 
+      // Generate new tokens with the updated role (AUTHOR)
+      const { generateTokens, setAuthCookies } = require('../controllers/authController');
+      const { accessToken, refreshToken } = generateTokens(updatedUser.id, updatedUser.role);
+      
+      // Set the new cookies
+      setAuthCookies(res, accessToken, refreshToken);
+      
+      // Also include the tokens in the response body for frontend to update
+      const responseWithTokens = {
+        ...userWithoutPassword,
+        tokens: {
+          accessToken,
+          refreshToken
+        }
+      };
+      
       res.status(200).json({
         success: true,
         message: "Profile updated to researcher status",
-        data: userWithoutPassword,
+        data: responseWithTokens,
       });
     } else {
       // Downgrade to regular user
@@ -330,10 +384,26 @@ export const toggleResearcherStatus = async (req: Request, res: Response) => {
       // Return updated user without password
       const { password: _, ...userWithoutPassword } = updatedUser;
 
+      // Generate new tokens with the updated role (USER)
+      const { generateTokens, setAuthCookies } = require('../controllers/authController');
+      const { accessToken, refreshToken } = generateTokens(updatedUser.id, updatedUser.role);
+      
+      // Set the new cookies
+      setAuthCookies(res, accessToken, refreshToken);
+      
+      // Also include the tokens in the response body for frontend to update
+      const responseWithTokens = {
+        ...userWithoutPassword,
+        tokens: {
+          accessToken,
+          refreshToken
+        }
+      };
+
       res.status(200).json({
         success: true,
         message: "Profile updated to regular user status",
-        data: userWithoutPassword,
+        data: responseWithTokens,
       });
     }
   } catch (error) {

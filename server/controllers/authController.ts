@@ -29,7 +29,7 @@ const cookieConfig: CookieOptions = {
 const tokenBlacklist = new Set<string>();
 
 // Helper function to generate tokens
-const generateTokens = (userId: number, role: UserRole) => {
+export const generateTokens = (userId: number, role: UserRole) => {
   // Short-lived access token
   const accessToken = jwt.sign(
     { id: userId, role, tokenType: "access" },
@@ -51,7 +51,7 @@ const generateTokens = (userId: number, role: UserRole) => {
 };
 
 // Helper function to set auth cookies
-const setAuthCookies = (res: Response, accessToken: string, refreshToken: string) => {
+export const setAuthCookies = (res: Response, accessToken: string, refreshToken: string) => {
   console.log("Setting cookies with config:", {
     environment: NODE_ENV,
     secure: NODE_ENV === "production",
@@ -86,7 +86,7 @@ const setAuthCookies = (res: Response, accessToken: string, refreshToken: string
 };
 
 // Helper function to clear auth cookies
-const clearAuthCookies = (res: Response) => {
+export const clearAuthCookies = (res: Response) => {
   res.cookie("accessToken", "", { ...cookieConfig, maxAge: 0 });
   res.cookie("refreshToken", "", { ...cookieConfig, maxAge: 0 });
 };

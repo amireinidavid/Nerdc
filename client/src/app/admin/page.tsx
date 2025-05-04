@@ -175,7 +175,7 @@ const AdminPage = () => {
           {/* Published This Month */}
           <div className="bg-white rounded-xl p-6 shadow-md border border-emerald-100 hover:border-emerald-300 transition-all">
             <div className="flex items-start justify-between">
-              <div>
+    <div>
                 <p className="text-gray-600 font-medium mb-1">Published This Month</p>
                 <h2 className="text-3xl font-bold text-gray-800">{isLoading ? "..." : stats.publishedThisMonth}</h2>
                 <p className="text-gray-600 mt-4 text-sm">New journals published in the current month</p>

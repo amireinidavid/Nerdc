@@ -1,24 +1,33 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import useAuthStore from '@/store/authStore';
 import { z } from 'zod';
 import { ArrowLeft, Mail } from 'lucide-react';
+import emailjs from '@emailjs/browser';
+import { v4 as uuidv4 } from 'uuid';
 
 // Validation schema
 const forgotPasswordSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
 });
 
+// EmailJS configuration
+const EMAILJS_SERVICE_ID = 'service_kvgn01c';
+const EMAILJS_TEMPLATE_ID = 'template_9qgu0g7';
+const EMAILJS_PUBLIC_KEY = 'ms-zUsw4YPlhKkTxc';
+
 const ForgotPasswordPage = () => {
   const router = useRouter();
   const { requestPasswordReset, isLoading, error, clearError } = useAuthStore();
+  const formRef = useRef<HTMLFormElement>(null);
   
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
   const [validationError, setValidationError] = useState('');
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,11 +42,40 @@ const ForgotPasswordPage = () => {
         return;
       }
       
-      // Request password reset
+      setSendingEmail(true);
+      
+      // Generate a unique reset token
+      const resetToken = uuidv4();
+      
+      // Store the reset token in the backend through the API
       await requestPasswordReset(email);
+      
+      // Build the reset link with the token
+      const resetLink = `https://nerdc-journal.vercel.app/reset-password/${resetToken}`;
+      
+      // Prepare template parameters for EmailJS
+      const templateParams = {
+        email: email,
+        to_name: email.split('@')[0],
+        link: resetLink,
+        message: `Click the link below to reset your password. If you didn't request this, please ignore this email.`,
+        site_name: 'NERDC Journal',
+      };
+      
+      // Send the email using EmailJS
+      const response = await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams,
+        EMAILJS_PUBLIC_KEY
+      );
+      
+      console.log('Email sent successfully!', response.status, response.text);
       setEmailSent(true);
+      setSendingEmail(false);
     } catch (err) {
       console.error('Password reset request failed:', err);
+      setSendingEmail(false);
     }
   };
 
@@ -84,7 +122,7 @@ const ForgotPasswordPage = () => {
               </p>
             </div>
           ) : (
-            <form className="space-y-6" onSubmit={handleSubmit}>
+            <form ref={formRef} className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                   Email address
@@ -125,12 +163,12 @@ const ForgotPasswordPage = () => {
               <div>
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || sendingEmail}
                   className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 ${
-                    isLoading ? 'opacity-75 cursor-not-allowed' : ''
+                    (isLoading || sendingEmail) ? 'opacity-75 cursor-not-allowed' : ''
                   }`}
                 >
-                  {isLoading ? 'Sending...' : 'Send reset link'}
+                  {isLoading || sendingEmail ? 'Sending...' : 'Send reset link'}
                 </button>
               </div>
               

@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 // Store
 import useJournalStore from '@/store/useJournalStore';
 import useAuthStore from '@/store/authStore';
+import useCartStore from '@/store/useCartStore';
 
 // Icons & UI Components
 import { 
@@ -26,119 +27,22 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 
-// PDF Viewer (directly implemented like admin page)
-const PDFViewer = ({ url, maxPages }: { url: string, maxPages?: number }) => {
-  const [error, setError] = useState(false);
-  const [iframeKey, setIframeKey] = useState(Date.now());
-  const [viewMethod, setViewMethod] = useState<'direct' | 'pdfjs'>('direct');
-  
-  // Reset the iframe key to force a refresh
-  const refreshViewer = () => {
-    setError(false);
-    setIframeKey(Date.now());
-  };
-  
-  // Toggle the view method
-  const toggleViewMethod = () => {
-    setViewMethod(prev => prev === 'direct' ? 'pdfjs' : 'direct');
-    setError(false);
-    setIframeKey(Date.now());
-  };
-  
-  // If no URL is provided
-  if (!url) return (
-    <div className="flex items-center justify-center h-[500px] bg-background/40 border border-white/10 rounded-md">
-      <p className="text-muted-foreground">No PDF available</p>
-    </div>
-  );
-  
-  // If there was an error loading the PDF
-  if (error) return (
-    <div className="flex flex-col items-center justify-center h-[500px] bg-background/40 border border-white/10 rounded-md">
-      <p className="text-red-500 mb-2">Failed to load PDF preview</p>
-      <div className="flex flex-col sm:flex-row gap-2 mt-2">
-        <Button variant="outline" onClick={refreshViewer} className="border-white/10">
-          Try Again
-        </Button>
-        <Button variant="outline" onClick={toggleViewMethod} className="border-white/10">
-          Try Alternative Viewer
-        </Button>
-        <Button 
-          variant="default" 
-          onClick={() => window.open(url, '_blank')}
-          className="bg-primary hover:bg-primary/90"
-        >
-          Open in New Tab
-        </Button>
-      </div>
-    </div>
-  );
-  
-  // Use direct iframe for Cloudinary URLs
-  if (viewMethod === 'direct') {
-    return (
-      <div className="relative">
-        <div className="absolute top-2 right-2 z-10">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={toggleViewMethod}
-            className="bg-background/70 border-white/10 text-xs"
-          >
-            Switch Viewer
-          </Button>
-        </div>
-        <iframe 
-          key={iframeKey}
-          src={url}
-          className="w-full h-[500px] border border-white/10 rounded-md"
-          onError={() => setError(true)}
-        />
-      </div>
-    );
-  }
-  
-  // PDF.js viewer as alternative
-  const pdfViewerUrl = `/pdfjs/web/viewer.html?file=${encodeURIComponent(url)}`;
-  
-  return (
-    <div className="relative">
-      <div className="absolute top-2 right-2 z-10">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={toggleViewMethod}
-          className="bg-background/70 border-white/10 text-xs"
-        >
-          Switch Viewer
-        </Button>
-      </div>
-      <iframe 
-        key={iframeKey}
-        src={pdfViewerUrl}
-        className="w-full h-[500px] border border-white/10 rounded-md"
-        onError={() => setError(true)}
-      />
-    </div>
-  );
-};
-
 // Citation styles
 const citationStyles = {
   apa: (journal: any) => {
-    const author = journal.author?.name || 'Unknown';
-    const year = new Date(journal.publicationDate || journal.createdAt).getFullYear();
-    return `${author}. (${year}). ${journal.title}. Journal of Academic Research. doi: ${journal.doi || 'N/A'}`;
+    const author = journal?.author?.name || 'Unknown';
+    const year = new Date(journal?.publicationDate || journal?.createdAt).getFullYear();
+    return `${author}. (${year}). ${journal?.title}. Journal of Academic Research. doi: ${journal?.doi || 'N/A'}`;
   },
   mla: (journal: any) => {
-    const author = journal.author?.name || 'Unknown';
-    const year = new Date(journal.publicationDate || journal.createdAt).getFullYear();
-    return `${author}. "${journal.title}." Journal of Academic Research, ${year}. doi: ${journal.doi || 'N/A'}`;
+    const author = journal?.author?.name || 'Unknown';
+    const year = new Date(journal?.publicationDate || journal?.createdAt).getFullYear();
+    return `${author}. "${journal?.title}." Journal of Academic Research, ${year}. doi: ${journal?.doi || 'N/A'}`;
   },
   chicago: (journal: any) => {
-    const author = journal.author?.name || 'Unknown';
-    const year = new Date(journal.publicationDate || journal.createdAt).getFullYear();
-    return `${author}. ${year}. "${journal.title}." Journal of Academic Research. doi: ${journal.doi || 'N/A'}`;
+    const author = journal?.author?.name || 'Unknown';
+    const year = new Date(journal?.publicationDate || journal?.createdAt).getFullYear();
+    return `${author}. ${year}. "${journal?.title}." Journal of Academic Research. doi: ${journal?.doi || 'N/A'}`;
   }
 };
 
@@ -147,6 +51,8 @@ const JournalDetailsPage = () => {
   const router = useRouter();
   const { fetchJournalById, currentJournal, isLoading, error, fetchJournals, journals } = useJournalStore();
   const { user, isAuthenticated } = useAuthStore();
+  const { addToCart, isSubmitting: isCartSubmitting } = useCartStore();
+  const [hasPurchased, setHasPurchased] = useState(false);
   console.log(currentJournal, 'currentJournal');
   // UI states
   const [selectedCitation, setSelectedCitation] = useState('apa');
@@ -175,6 +81,28 @@ const JournalDetailsPage = () => {
       fetchJournals(1, 4, { category: currentJournal.categoryId });
     }
   }, [currentJournal?.categoryId, fetchJournals]);
+  
+  // Check if the user has purchased this journal
+  useEffect(() => {
+    const checkPurchaseStatus = async () => {
+      if (isAuthenticated && currentJournal) {
+        try {
+          // Make API call to check if journal is purchased
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://nerdc-server.vercel.app'}/journals/check-purchase/${currentJournal.id}`, {
+            credentials: 'include',
+          });
+          
+          const data = await response.json();
+          setHasPurchased(data.purchased);
+        } catch (error) {
+          console.error("Error checking purchase status:", error);
+          setHasPurchased(false);
+        }
+      }
+    };
+    
+    checkPurchaseStatus();
+  }, [isAuthenticated, currentJournal]);
   
   // Handle citation copy
   const copyCitation = () => {
@@ -338,6 +266,22 @@ const JournalDetailsPage = () => {
     }
   };
   
+  // Handle add to cart
+  const handleAddToCart = async () => {
+    if (!currentJournal) return;
+    
+    if (!isAuthenticated) {
+      toast.error('Please login to add this journal to your cart');
+      router.push('/login');
+      return;
+    }
+    
+    const success = await addToCart(currentJournal.id);
+    if (success) {
+      toast.success('Journal added to cart');
+    }
+  };
+  
   // Get related journals from the same category
   const getRelatedJournals = () => {
     if (!currentJournal || !journals.length) return [];
@@ -358,129 +302,15 @@ const JournalDetailsPage = () => {
     return text.slice(0, length) + '...';
   };
   
-  // Update preview tab content
-  const renderPreviewTab = () => (
-    <TabsContent value="preview" className="pt-4 pb-8 px-0 focus-visible:outline-none focus-visible:ring-0">
-      <div className="px-6 mb-6">
-        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-emerald-700">
-          Document Preview
-        </h2>
-        <p className="text-gray-600">Preview the first few pages of this journal article.</p>
-      </div>
-      
-      {/* PDF Preview */}
-      <div className="relative">
-        {currentJournal?.pdfUrl ? (
-          <div className="space-y-4">
-            <div className="flex justify-end px-6 space-x-2">
-              <Button 
-                variant="default"
-                size="sm"
-                onClick={handleDownload}
-                disabled={isDownloading}
-                className="bg-emerald-600 hover:bg-emerald-700"
-              >
-                {isDownloading ? (
-                  <>
-                    <div className="h-4 w-4 mr-2 animate-spin border-2 border-white border-t-transparent rounded-full" />
-                    {downloadProgress}%
-                  </>
-                ) : (
-                  <>
-                    <Download className="h-4 w-4 mr-2" />
-                    Save to Computer
-                  </>
-                )}
-              </Button>
-            </div>
-            <div className="border border-emerald-100 rounded-lg overflow-hidden">
-              <PDFViewer url={currentJournal?.pdfUrl || ''} maxPages={3} />
-            </div>
-          </div>
-        ) : (
-          <div className="h-[600px] bg-gray-50 flex items-center justify-center">
-            <div className="text-center px-6 py-12 max-w-md rounded-lg border border-emerald-100 bg-white shadow-sm">
-              <FileText className="h-12 w-12 mb-4 mx-auto text-emerald-600 opacity-80" />
-              <h3 className="text-xl font-bold mb-3 text-gray-900">PDF Preview</h3>
-              <p className="text-sm text-gray-600 mb-6">
-                No PDF file is available for preview. Please download the full document to view.
-              </p>
-              <Button 
-                onClick={handleDownload} 
-                className="bg-emerald-600 hover:bg-emerald-700 gap-2"
-                disabled={isDownloading}
-              >
-                {isDownloading ? (
-                  <>
-                    <div className="h-4 w-4 mr-2 animate-spin border-2 border-white border-t-transparent rounded-full" />
-                    {downloadProgress}%
-                  </>
-                ) : (
-                  <>
-                    <Download className="h-4 w-4" />
-                    Download PDF
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
-    </TabsContent>
-  );
-  
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="container max-w-6xl py-12 mx-auto">
-        <div className="space-y-8">
-          <Skeleton className="h-16 w-3/4 rounded-lg" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="md:col-span-2 space-y-8">
-              <Skeleton className="h-[300px] w-full rounded-lg" />
-              <div className="space-y-4">
-                <Skeleton className="h-8 w-40 rounded-lg" />
-                <Skeleton className="h-4 w-full rounded-lg" />
-                <Skeleton className="h-4 w-full rounded-lg" />
-                <Skeleton className="h-4 w-4/5 rounded-lg" />
-              </div>
-            </div>
-            <div className="space-y-6">
-              <Skeleton className="h-[200px] w-full rounded-lg" />
-              <Skeleton className="h-[150px] w-full rounded-lg" />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  
-  // Error state
-  if (error || !currentJournal) {
-    return (
-      <div className="container max-w-6xl py-12 mx-auto">
-        <div className="bg-gradient-to-br from-white to-emerald-50 backdrop-blur-sm border border-emerald-100 rounded-xl p-8 text-center shadow-lg">
-          <h2 className="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-emerald-500">Journal Not Found</h2>
-          <p className="mb-6 text-gray-600">
-            {error || "The journal you're looking for doesn't exist or has been removed."}
-          </p>
-          <Button onClick={() => router.push('/journals')} className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white">
-            Browse Journals
-          </Button>
-        </div>
-      </div>
-    );
-  }
-  
   // Get related journals
   const relatedJournals = getRelatedJournals();
   
   // Get tag names array
-  const tagNames = currentJournal.tags ? currentJournal.tags.map(t => t.tag.name) : [];
+  const tagNames = currentJournal?.tags ? currentJournal?.tags.map(t => t.tag.name) : [];
   
   // Format status badge
   const getStatusBadge = () => {
-    switch(currentJournal.reviewStatus) {
+    switch(currentJournal?.reviewStatus) {
       case 'PUBLISHED':
         return <Badge className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/30">Published</Badge>;
       case 'UNDER_REVIEW':
@@ -490,7 +320,7 @@ const JournalDetailsPage = () => {
       case 'REJECTED':
         return <Badge className="bg-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/30">Rejected</Badge>;
       default:
-        return <Badge className="bg-primary/20">{currentJournal.reviewStatus}</Badge>;
+        return <Badge className="bg-primary/20">{currentJournal?.reviewStatus}</Badge>;
     }
   };
   
@@ -509,14 +339,14 @@ const JournalDetailsPage = () => {
         <motion.div variants={itemVariants} className="relative overflow-hidden rounded-xl border border-emerald-100 bg-white shadow-lg p-6 md:p-10">
           {/* Category and Status */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {currentJournal.category && (
+            {currentJournal?.category && (
               <Badge variant="outline" className="bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-700">
-                {currentJournal.category.name}
+                {currentJournal?.category?.name}
               </Badge>
             )}
             {getStatusBadge()}
             <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
-              <Eye className="h-3 w-3 mr-1" /> {currentJournal.viewCount || 0} views
+              <Eye className="h-3 w-3 mr-1" /> {currentJournal?.viewCount || 0} views
             </Badge>
           </div>
           
@@ -524,41 +354,66 @@ const JournalDetailsPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="md:col-span-3">
               <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-gray-900">
-                {currentJournal.title}
+                {currentJournal?.title}
               </h1>
               
               <div className="flex items-center gap-3 mb-6">
                 <Avatar className="h-9 w-9 border border-emerald-100">
-                  <AvatarImage src={currentJournal.author?.profileImage || ''} alt={currentJournal.author?.name || 'Author'} />
+                  <AvatarImage src={currentJournal?.author?.profileImage || ''} alt={currentJournal?.author?.name || 'Author'} />
                   <AvatarFallback className="bg-emerald-100 text-emerald-600">
-                    {currentJournal.author?.name?.charAt(0) || 'A'}
+                    {currentJournal?.author?.name?.charAt(0) || 'A'}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <Link href={`/authors/${currentJournal.authorId}`} className="font-medium hover:text-emerald-600 transition-colors">
-                    {currentJournal.author?.name || 'Anonymous'}
+                  <Link href={`/authors/${currentJournal?.authorId}`} className="font-medium hover:text-emerald-600 transition-colors">
+                    {currentJournal?.author?.name || 'Anonymous'}
                   </Link>
                   <p className="text-sm text-gray-600 flex items-center gap-1">
-                    <Calendar className="h-3 w-3" /> {formatDate(currentJournal.publicationDate || currentJournal.createdAt)}
+                    <Calendar className="h-3 w-3" /> {formatDate(currentJournal?.publicationDate || currentJournal?.createdAt)}
                   </p>
                 </div>
               </div>
             </div>
             
             {/* Action Buttons */}
-            <div className="md:col-span-1 flex md:justify-end items-start gap-2 md:gap-3">
-              <Button 
-                onClick={handleDownload} 
-                className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
-                size="lg"
-              >
-                <Download className="h-5 w-5" />
-                {currentJournal.price && typeof currentJournal.price === 'number' && currentJournal.price > 0 
-                  ? `$${currentJournal.price.toFixed(2)}` 
-                  : 'Download'}
-              </Button>
+            <div className="md:col-span-1 flex flex-col md:items-end gap-2">
+              <div className="flex gap-2 w-full md:w-auto">
+                <Button 
+                  onClick={hasPurchased ? handleDownload : handleAddToCart} 
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+                  size="lg"
+                  disabled={isCartSubmitting || isDownloading}
+                >
+                  {isCartSubmitting || isDownloading ? (
+                    <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : hasPurchased ? (
+                    <>
+                      <Download className="h-5 w-5" />
+                      Download PDF
+                    </>
+                  ) : (
+                    <>
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        className="h-5 w-5" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth={2} 
+                          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" 
+                        />
+                      </svg>
+                      Add to Cart <span className="font-semibold">₦10,000</span>
+                    </>
+                  )}
+                </Button>
+              </div>
               
-              <div className="flex gap-2">
+              <div className="flex gap-2 self-end">
                 <Button variant="outline" size="icon" className="rounded-full border-gray-200 bg-white"
                   onClick={() => setIsBookmarked(!isBookmarked)}>
                   <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-emerald-600 text-emerald-600' : ''}`} />
@@ -577,7 +432,7 @@ const JournalDetailsPage = () => {
           {/* Main Content Column */}
           <motion.div variants={itemVariants} className="lg:col-span-2 space-y-8">
             {/* Journal Cover/Preview */}
-            {currentJournal.thumbnailUrl && (
+            {currentJournal?.thumbnailUrl && (
               <div className="overflow-hidden rounded-xl border border-emerald-100 shadow-lg">
                 <div className="relative h-72 sm:h-96 w-full">
                   <Image 
@@ -620,14 +475,6 @@ const JournalDetailsPage = () => {
                     </TabsTrigger>
                     
                     <TabsTrigger 
-                      value="preview" 
-                      className="flex-1 data-[state=active]:bg-emerald-50 data-[state=active]:shadow-none rounded-none h-full text-gray-700 data-[state=active]:text-emerald-700"
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Preview
-                    </TabsTrigger>
-                    
-                    <TabsTrigger 
                       value="citation" 
                       className="flex-1 data-[state=active]:bg-emerald-50 data-[state=active]:shadow-none rounded-none h-full text-gray-700 data-[state=active]:text-emerald-700"
                     >
@@ -647,10 +494,10 @@ const JournalDetailsPage = () => {
                       <div className="prose prose-emerald max-w-none">
                         <p className="text-gray-700">
                           {showFullAbstract 
-                            ? currentJournal.abstract 
-                            : truncateText(currentJournal.abstract, 500)}
+                           ? (currentJournal?.abstract || '') 
+                           : truncateText(currentJournal?.abstract || '', 500)}
                         </p>
-                        {currentJournal.abstract.length > 500 && (
+                        {currentJournal?.abstract && currentJournal?.abstract.length > 500 && (
                           <Button 
                             variant="link" 
                             onClick={() => setShowFullAbstract(!showFullAbstract)}
@@ -663,14 +510,14 @@ const JournalDetailsPage = () => {
                     </div>
                     
                     {/* Keywords/Tags Section */}
-                    {currentJournal.tags && currentJournal.tags.length > 0 && (
+                    {currentJournal?.tags && currentJournal?.tags.length > 0 && (
                       <div>
                         <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-emerald-700">
                           <Tag className="h-4 w-4" />
                           Keywords
                         </h3>
                         <div className="flex flex-wrap gap-2">
-                          {currentJournal.tags.map((tagItem) => (
+                          {currentJournal?.tags.map((tagItem) => (
                             <Badge key={tagItem.tag.id} variant="secondary" className="px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 border-0">
                               #{tagItem.tag.name}
                             </Badge>
@@ -680,22 +527,19 @@ const JournalDetailsPage = () => {
                     )}
                     
                     {/* Additional content section if available */}
-                    {currentJournal.content && (
+                    {currentJournal?.content && (
                       <div>
                         <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-emerald-700">
                           <MessageSquare className="h-4 w-4" />
                           Additional Content
                         </h3>
                         <div className="prose prose-emerald max-w-none">
-                          <p className="text-gray-700">{currentJournal.content}</p>
+                          <p className="text-gray-700">{currentJournal?.content}</p>
                         </div>
                       </div>
                     )}
                   </div>
                 </TabsContent>
-                
-                {/* Updated Preview Tab */}
-                {renderPreviewTab()}
                 
                 <TabsContent value="citation" className="p-6 focus-visible:outline-none focus-visible:ring-0">
                   <div className="space-y-6">
@@ -734,13 +578,13 @@ const JournalDetailsPage = () => {
                       </div>
                       
                       {/* DOI information if available */}
-                      {currentJournal.doi && (
+                      {currentJournal?.doi && (
                         <div className="mt-6 flex items-center gap-3 text-sm">
                           <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">DOI</Badge>
-                          <code className="font-mono text-gray-700">{currentJournal.doi}</code>
+                          <code className="font-mono text-gray-700">{currentJournal?.doi}</code>
                           <Button variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-full text-emerald-600 hover:bg-emerald-50" 
                             onClick={() => {
-                              navigator.clipboard.writeText(currentJournal.doi || '');
+                              navigator.clipboard.writeText(currentJournal?.doi || '');
                               toast.success('DOI copied to clipboard');
                             }}>
                             <Copy className="h-3.5 w-3.5" />
@@ -773,7 +617,7 @@ const JournalDetailsPage = () => {
                     <div>
                       <p className="text-sm font-medium text-gray-900">Publication Date</p>
                       <p className="text-sm text-gray-600">
-                        {formatDate(currentJournal.publicationDate || currentJournal.createdAt)}
+                        {formatDate(currentJournal?.publicationDate || currentJournal?.createdAt)}
                       </p>
                     </div>
                   </div>
@@ -785,7 +629,7 @@ const JournalDetailsPage = () => {
                     <div>
                       <p className="text-sm font-medium text-gray-900">File Details</p>
                       <p className="text-sm text-gray-600">
-                        PDF • {currentJournal.pageCount ? `${currentJournal.pageCount} pages` : 'Full document'}
+                        PDF • {currentJournal?.pageCount ? `${currentJournal?.pageCount} pages` : 'Full document'}
                       </p>
                     </div>
                   </div>
@@ -798,16 +642,16 @@ const JournalDetailsPage = () => {
                       <p className="text-sm font-medium text-gray-900">Metrics</p>
                       <div className="flex items-center gap-3 text-sm text-gray-600">
                         <span className="flex items-center gap-1">
-                          <Eye className="h-3.5 w-3.5" /> {currentJournal.viewCount || 0}
+                          <Eye className="h-3.5 w-3.5" /> {currentJournal?.viewCount || 0}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Download className="h-3.5 w-3.5" /> {(currentJournal as any).downloadCount || 0}
+                          <Download className="h-3.5 w-3.5" /> {(currentJournal as any)?.downloadCount || 0}
                         </span>
                       </div>
                     </div>
                   </div>
                   
-                  {currentJournal.doi && (
+                  {currentJournal?.doi && (
                     <div className="flex items-start gap-3">
                       <div className="h-9 w-9 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
                         <Link2 className="h-5 w-5 text-emerald-600" />
@@ -815,7 +659,7 @@ const JournalDetailsPage = () => {
                       <div>
                         <p className="text-sm font-medium text-gray-900">DOI</p>
                         <p className="text-sm text-gray-600 font-mono break-all">
-                          {currentJournal.doi}
+                          {currentJournal?.doi}
                         </p>
                       </div>
                     </div>
@@ -823,25 +667,45 @@ const JournalDetailsPage = () => {
                 </CardContent>
                 
                 <CardFooter className="px-5 py-4 border-t border-emerald-100 bg-emerald-50">
-                  <Button 
-                    onClick={handleDownload} 
-                    className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
-                    disabled={isDownloading}
-                  >
-                    {isDownloading ? (
-                      <>
-                        <div className="h-4 w-4 mr-2 animate-spin border-2 border-white border-t-transparent rounded-full" />
-                        {downloadProgress}%
-                      </>
-                    ) : (
-                      <>
-                    <Download className="h-5 w-5" />
-                    {currentJournal.price && typeof currentJournal.price === 'number' && currentJournal.price > 0 
-                      ? `Purchase • $${currentJournal.price.toFixed(2)}` 
-                      : 'Download PDF'}
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex flex-col gap-2 w-full">
+                    <Button 
+                      onClick={hasPurchased ? handleDownload : handleAddToCart} 
+                      className={`w-full gap-2 ${hasPurchased 
+                        ? 'bg-emerald-700 hover:bg-emerald-800' 
+                        : 'bg-emerald-600 hover:bg-emerald-700'} text-white`}
+                      disabled={isCartSubmitting || isDownloading}
+                    >
+                      {isCartSubmitting || isDownloading ? (
+                        <>
+                          <div className="h-4 w-4 mr-2 animate-spin border-2 border-white border-t-transparent rounded-full" />
+                          {isDownloading ? `${downloadProgress}%` : 'Processing...'}
+                        </>
+                      ) : hasPurchased ? (
+                        <>
+                          <Download className="h-5 w-5" />
+                          Download PDF
+                        </>
+                      ) : (
+                        <>
+                          <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            className="h-5 w-5" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            stroke="currentColor"
+                          >
+                            <path 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round" 
+                              strokeWidth={2} 
+                              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" 
+                            />
+                          </svg>
+                          Add to Cart • ₦10,000
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </CardFooter>
               </Card>
             </motion.div>
@@ -858,39 +722,39 @@ const JournalDetailsPage = () => {
                 <CardContent className="p-5">
                   <div className="flex items-center gap-4 mb-4">
                     <Avatar className="h-16 w-16 border border-emerald-100 shadow-md">
-                      <AvatarImage src={currentJournal.author?.profileImage || ''} alt={currentJournal.author?.name || 'Author'} />
+                      <AvatarImage src={currentJournal?.author?.profileImage || ''} alt={currentJournal?.author?.name || 'Author'} />
                       <AvatarFallback className="text-xl font-semibold bg-emerald-100 text-emerald-600">
-                        {currentJournal.author?.name?.charAt(0) || 'A'}
+                        {currentJournal?.author?.name?.charAt(0) || 'A'}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="font-semibold text-lg text-gray-900">{currentJournal.author?.name || 'Anonymous'}</h3>
-                      {currentJournal.author?.institution && (
+                      <h3 className="font-semibold text-lg text-gray-900">{currentJournal?.author?.name || 'Anonymous'}</h3>
+                      {currentJournal?.author?.institution && (
                         <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
                           <Building className="h-3.5 w-3.5" />
-                          {currentJournal.author.institution}
+                          {currentJournal?.author.institution}
                         </p>
                       )}
                     </div>
                   </div>
                   
-                  {currentJournal.author?.bio && (
+                  {currentJournal?.author?.bio && (
                     <div className="mb-4">
                       <p className="text-sm text-gray-600">
-                        {truncateText(currentJournal.author.bio, 150)}
+                        {truncateText(currentJournal?.author.bio, 150)}
                       </p>
                     </div>
                   )}
                   
                   <div className="mt-4 space-y-2">
                     <Button variant="outline" className="w-full gap-2 border-emerald-200 bg-white hover:bg-emerald-50 text-emerald-700" asChild>
-                      <Link href={`/authors/${currentJournal.authorId}`}>
+                      <Link href={`/authors/${currentJournal?.authorId}`}>
                         <User className="h-4 w-4" />
                         View Profile
                       </Link>
                     </Button>
                     <Button variant="outline" className="w-full gap-2 border-emerald-200 bg-white hover:bg-emerald-50 text-emerald-700" asChild>
-                      <Link href={`/journals?author=${currentJournal.authorId}`}>
+                      <Link href={`/journals?author=${currentJournal?.authorId}`}>
                         <FileText className="h-4 w-4" />
                         More Publications
                       </Link>
@@ -921,7 +785,7 @@ const JournalDetailsPage = () => {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-emerald-700">Related Journals</h2>
               <Button variant="ghost" size="sm" className="gap-1 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50" asChild>
-                <Link href={`/journals?category=${currentJournal.categoryId}`}>
+                <Link href={`/journals?category=${currentJournal?.categoryId}`}>
                   View All <ChevronRight className="h-4 w-4" />
                 </Link>
               </Button>

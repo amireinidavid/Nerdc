@@ -47,6 +47,12 @@ enum ProfileStatus {
   COMPLETE
 }
 
+enum CartStatus {
+  ACTIVE
+  COMPLETED
+  ABANDONED
+}
+
 model User {
   id                 Int           @id @default(autoincrement())
   email              String        @unique
@@ -94,6 +100,7 @@ model User {
   downloads          Download[]
   comments           Comment[]
   savedJournals      SavedJournal[]
+  carts              Cart[]        // Relation to carts
 }
 
 model Subscription {
@@ -135,20 +142,58 @@ model Payment {
   id             Int           @id @default(autoincrement())
   userId         Int
   subscriptionId Int?
+  cartId         Int?          // New field for cart payments
   amount         Decimal       @db.Decimal(10, 2)
   currency       String        @default("USD")
   status         PaymentStatus @default(PENDING)
   paymentMethod  String
   transactionId  String?
+  remitaRRR      String?       // Remita Reference Number
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
   // Relations
   user           User          @relation(fields: [userId], references: [id])
   subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  cart           Cart?         @relation(fields: [cartId], references: [id])
 
   @@index([userId])
   @@index([subscriptionId])
+  @@index([cartId])
+}
+
+// Cart model to store user's shopping cart
+model Cart {
+  id             Int           @id @default(autoincrement())
+  userId         Int
+  status         CartStatus    @default(ACTIVE)
+  totalAmount    Decimal       @default(0) @db.Decimal(10, 2)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  user           User          @relation(fields: [userId], references: [id])
+  items          CartItem[]    // Relation to cart items
+  payments       Payment[]     // Relation to payments
+
+  @@index([userId])
+}
+
+// Cart items to store journals in the cart
+model CartItem {
+  id             Int           @id @default(autoincrement())
+  cartId         Int
+  journalId      Int
+  price          Decimal       @db.Decimal(10, 2)
+  createdAt      DateTime      @default(now())
+
+  // Relations
+  cart           Cart          @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  journal        Journal       @relation(fields: [journalId], references: [id])
+
+  @@unique([cartId, journalId]) // Prevent duplicate journals in cart
+  @@index([cartId])
+  @@index([journalId])
 }
 
 model Category {
@@ -197,6 +242,7 @@ model Journal {
   downloads      Download[]     @relation("JournalDownloads")
   comments       Comment[]      @relation("JournalComments")
   savedBy        SavedJournal[] @relation("JournalSaved")
+  cartItems      CartItem[]     // Relation to cart items
 
   @@index([authorId])
   @@index([reviewerId])

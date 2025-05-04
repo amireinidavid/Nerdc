@@ -48,6 +48,7 @@ router.post('/save/:id', authenticate, JournalController.saveJournal);
 router.delete('/save/:id', authenticate, JournalController.unsaveJournal);
 router.post('/download/:id', authenticate, JournalController.downloadJournal);
 router.post('/comment/:id', authenticate, JournalController.addComment);
+router.get('/check-purchase/:journalId', authenticate, JournalController.checkPurchaseStatus);
 
 // Author routes (for authors only)
 router.get('/my-journals', authenticate, authorize([UserRole.AUTHOR, UserRole.ADMIN]), JournalController.getUserJournals);

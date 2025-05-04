@@ -1941,3 +1941,66 @@ export const checkUserStatus = async (req: Request, res: Response): Promise<void
     });
   }
 };
+
+// Check if the user has purchased a journal
+export const checkPurchaseStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const journalId = parseInt(req.params.journalId);
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: "Unauthorized - Please login to check purchase status",
+        purchased: false
+      });
+      return;
+    }
+
+    if (isNaN(journalId)) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid journal ID",
+        purchased: false
+      });
+      return;
+    }
+
+    // Check if the journal exists in a completed cart for this user
+    const completedCart = await prisma.cart.findFirst({
+      where: {
+        userId,
+        status: "COMPLETED",
+        items: {
+          some: {
+            journalId
+          }
+        }
+      },
+      include: {
+        payments: {
+          where: {
+            status: "COMPLETED"
+          }
+        }
+      }
+    });
+
+    // Return purchase status - a user has purchased if they have a completed cart with this journal
+    // and at least one successful payment for the cart
+    const hasPurchased = !!completedCart && completedCart.payments.length > 0;
+
+    res.status(200).json({
+      success: true,
+      purchased: hasPurchased
+    });
+  } catch (error) {
+    console.error("Error checking purchase status:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error checking purchase status",
+      purchased: false,
+      error: error instanceof Error ? error.message : "Unknown error"
+    });
+  }
+};

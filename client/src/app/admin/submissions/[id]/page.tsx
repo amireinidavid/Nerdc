@@ -188,7 +188,7 @@ const JournalReviewPage = () => {
     defaultValues: {
       reviewStatus: ReviewStatus.APPROVED,
       reviewNotes: "",
-      price: null,
+      price: 10000,
     },
   });
 
@@ -302,8 +302,8 @@ const JournalReviewPage = () => {
       // Convert price to appropriate format for backend
       const processedValues = {
         ...values,
-        // Convert price to number for submission
-        price: values.price !== null ? values.price : undefined,
+        // Set price to 10000 for all submissions
+        price: 10000,
         isPublished: values.reviewStatus === ReviewStatus.PUBLISHED,
       };
 
@@ -671,7 +671,7 @@ const JournalReviewPage = () => {
                     name="price"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-emerald-700">Price (₦)</FormLabel>
+                        <FormLabel className="text-emerald-700">Assessment Fee (₦)</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
@@ -679,19 +679,14 @@ const JournalReviewPage = () => {
                             </span>
                             <Input
                               type="number"
-                              placeholder="0.00"
-                              className="pl-8 border-emerald-200 bg-white"
-                              {...field}
-                              value={field.value === null ? '' : field.value}
-                              onChange={(e) => {
-                                const value = e.target.value === '' ? null : Number(e.target.value);
-                                field.onChange(value);
-                              }}
+                              className="pl-8 border-emerald-200 bg-gray-100"
+                              value="10,000.00"
+                              disabled
                             />
                           </div>
                         </FormControl>
                         <FormDescription className="text-gray-500">
-                          Set the price for this journal in Naira (₦) - required if publishing
+                          Fixed assessment fee of ₦10,000 for all journal submissions
                         </FormDescription>
                         <FormMessage />
                       </FormItem>

@@ -7,6 +7,7 @@ import { Container } from "@/components/ui/container";
 import { useRouter, usePathname } from "next/navigation";
 import useAuthStore from "@/store/authStore";
 import Image from "next/image";
+import useCartStore from "@/store/useCartStore";
 
 // Regular user navigation links
 const userLinks = [
@@ -30,6 +31,8 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user, logout, isAdmin } = useAuthStore();
+  const { cart, fetchCart } = useCartStore();
+
   const router = useRouter();
   const pathname = usePathname();
 
@@ -58,6 +61,13 @@ export function Header() {
       document.body.style.overflow = '';
     };
   }, [isOpen]);
+
+    // Fetch cart on component mount if user is authenticated
+    useEffect(() => {
+      if (user) {
+        fetchCart();
+      }
+    }, [user, fetchCart]);
 
   // Close mobile menu when window is resized to desktop size
   useEffect(() => {
@@ -154,6 +164,36 @@ export function Header() {
             </Link>
           ))}
         </nav>
+
+        
+  {/* Cart Icon Button - Desktop */}
+  <div className="hidden lg:block mr-2">
+    <button
+      onClick={() => router.push('/cart')}
+      className="relative p-2 rounded-full hover:bg-emerald-50 transition-colors group"
+      aria-label="Shopping Cart"
+    >
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        className="h-6 w-6 text-gray-700 group-hover:text-emerald-600 transition-colors" 
+        fill="none" 
+        viewBox="0 0 24 24" 
+        stroke="currentColor"
+      >
+        <path 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          strokeWidth={1.5} 
+          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" 
+        />
+      </svg>
+      {cart && cart.items && cart.items.length > 0 && (
+        <span className="absolute -top-1 -right-1 bg-emerald-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+          {cart.items.length}
+        </span>
+      )}
+    </button>
+  </div>
 
         {/* Login Button or User Profile - Desktop */}
         <div className="hidden lg:block">
@@ -316,7 +356,37 @@ export function Header() {
                 </Link>
               ))}
             </div>
-            
+              {/* Cart Link - Mobile */}
+    <Link
+      href="/cart"
+      className={`text-2xl font-medium transition-colors relative w-full text-center py-3 border-b border-gray-100 flex items-center justify-center
+        ${isLinkActive('/cart') 
+          ? "text-emerald-600" 
+          : "text-gray-800 hover:text-emerald-600"
+        }`}
+      onClick={() => setIsOpen(false)}
+    >
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        className="h-6 w-6 mr-2" 
+        fill="none" 
+        viewBox="0 0 24 24" 
+        stroke="currentColor"
+      >
+        <path 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          strokeWidth={1.5} 
+          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" 
+        />
+      </svg>
+      Cart
+      {cart && cart.items && cart.items.length > 0 && (
+        <span className="ml-2 bg-emerald-600 text-white text-sm w-6 h-6 flex items-center justify-center rounded-full">
+          {cart.items.length}
+        </span>
+      )}
+    </Link>
             {!user ? (
               <div className="flex justify-center mt-10">
               <button 

@@ -7,6 +7,7 @@ import { PrismaClient } from "./generated/prisma";
 import authRoutes from "./routes/authroutes";
 import profileRoutes from "./routes/profileRoutes";
 import journalRoutes from "./routes/journalRoutes";
+import cartRoutes from "./routes/cartRoutes";
 
 // Create temp directory for file uploads if it doesn't exist
 const tempDir = '/tmp';
@@ -105,6 +106,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/journals", journalRoutes);
+app.use("/api/cart", cartRoutes);
 
 // API health check route
 app.get("/api/health", (req, res) => {

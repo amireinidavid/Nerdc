@@ -121,66 +121,66 @@ const AdminPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white pt-20 pb-16">
+    <div className="min-h-screen bg-gradient-to-b from-white to-emerald-50 text-gray-800 pt-20 pb-16">
       <Container>
         {/* Dashboard Header */}
         <div className={`transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
-          <h1 className="text-3xl font-bold mb-1">Admin Dashboard</h1>
-          <p className="text-gray-400 mb-8">Overview of journal submissions and platform activity</p>
+          <h1 className="text-3xl font-bold mb-1 text-gray-800">Admin Dashboard</h1>
+          <p className="text-gray-600 mb-8">Overview of journal submissions and platform activity</p>
         </div>
 
         {/* Stats Cards */}
         <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10 transition-all duration-700 delay-100 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
           {/* Submissions Card */}
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 shadow-lg border border-gray-700 hover:border-purple-500/30 transition-all">
+          <div className="bg-white rounded-xl p-6 shadow-md border border-emerald-100 hover:border-emerald-300 transition-all">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-gray-400 font-medium mb-1">Total Submissions</p>
-                <h2 className="text-3xl font-bold">{isLoading ? "..." : stats.totalJournals}</h2>
+                <p className="text-gray-600 font-medium mb-1">Total Submissions</p>
+                <h2 className="text-3xl font-bold text-gray-800">{isLoading ? "..." : stats.totalJournals}</h2>
                 <div className="grid grid-cols-3 gap-2 mt-4">
-                  <div className="bg-gray-800/50 p-2 rounded-lg">
-                    <p className="text-xs text-amber-400">Recent</p>
-                    <p className="text-xl font-semibold">{isLoading ? "..." : stats.recentSubmissions}</p>
+                  <div className="bg-amber-50 p-2 rounded-lg">
+                    <p className="text-xs text-amber-600">Recent</p>
+                    <p className="text-xl font-semibold text-gray-800">{isLoading ? "..." : stats.recentSubmissions}</p>
                   </div>
-                  <div className="bg-gray-800/50 p-2 rounded-lg">
-                    <p className="text-xs text-green-400">Published</p>
-                    <p className="text-xl font-semibold">{isLoading ? "..." : stats.publishedThisMonth}</p>
+                  <div className="bg-emerald-50 p-2 rounded-lg">
+                    <p className="text-xs text-emerald-600">Published</p>
+                    <p className="text-xl font-semibold text-gray-800">{isLoading ? "..." : stats.publishedThisMonth}</p>
                   </div>
-                  <div className="bg-gray-800/50 p-2 rounded-lg">
-                    <p className="text-xs text-red-400">Rejected</p>
-                    <p className="text-xl font-semibold">{isLoading ? "..." : stats.rejectedSubmissions}</p>
+                  <div className="bg-red-50 p-2 rounded-lg">
+                    <p className="text-xs text-red-600">Rejected</p>
+                    <p className="text-xl font-semibold text-gray-800">{isLoading ? "..." : stats.rejectedSubmissions}</p>
                   </div>
                 </div>
               </div>
-              <div className="p-3 bg-purple-500/20 rounded-lg">
+              <div className="p-3 bg-emerald-100 text-emerald-600 rounded-lg">
                 <SubmissionsIcon />
               </div>
             </div>
           </div>
 
           {/* Contributors Card */}
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 shadow-lg border border-gray-700 hover:border-purple-500/30 transition-all">
+          <div className="bg-white rounded-xl p-6 shadow-md border border-emerald-100 hover:border-emerald-300 transition-all">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-gray-400 font-medium mb-1">Contributors</p>
-                <h2 className="text-3xl font-bold">{isLoading ? "..." : stats.contributorsCount}</h2>
-                <p className="text-gray-400 mt-4 text-sm">Total registered authors and researchers on the platform</p>
+                <p className="text-gray-600 font-medium mb-1">Contributors</p>
+                <h2 className="text-3xl font-bold text-gray-800">{isLoading ? "..." : stats.contributorsCount}</h2>
+                <p className="text-gray-600 mt-4 text-sm">Total registered authors and researchers on the platform</p>
               </div>
-              <div className="p-3 bg-blue-500/20 rounded-lg">
+              <div className="p-3 bg-emerald-100 text-emerald-600 rounded-lg">
                 <ContributorsIcon />
               </div>
             </div>
           </div>
 
           {/* Published This Month */}
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 shadow-lg border border-gray-700 hover:border-purple-500/30 transition-all">
+          <div className="bg-white rounded-xl p-6 shadow-md border border-emerald-100 hover:border-emerald-300 transition-all">
             <div className="flex items-start justify-between">
-    <div>
-                <p className="text-gray-400 font-medium mb-1">Published This Month</p>
-                <h2 className="text-3xl font-bold">{isLoading ? "..." : stats.publishedThisMonth}</h2>
-                <p className="text-gray-400 mt-4 text-sm">New journals published in the current month</p>
+              <div>
+                <p className="text-gray-600 font-medium mb-1">Published This Month</p>
+                <h2 className="text-3xl font-bold text-gray-800">{isLoading ? "..." : stats.publishedThisMonth}</h2>
+                <p className="text-gray-600 mt-4 text-sm">New journals published in the current month</p>
               </div>
-              <div className="p-3 bg-green-500/20 rounded-lg">
+              <div className="p-3 bg-emerald-100 text-emerald-600 rounded-lg">
                 <JournalsIcon />
               </div>
             </div>
@@ -189,19 +189,19 @@ const AdminPage = () => {
 
         {/* Quick Links Section */}
         <div className={`transition-all duration-700 delay-200 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          <h2 className="text-xl font-semibold mb-6">Quick Actions</h2>
+          <h2 className="text-xl font-semibold mb-6 text-gray-800">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {quickLinks.map((link, index) => (
               <button
                 key={index}
                 onClick={() => router.push(link.href)}
-                className="bg-gray-800/50 border border-gray-700 hover:border-purple-500/50 backdrop-blur-sm p-5 rounded-xl transition-all duration-300 hover:bg-gray-700/50 hover:shadow-lg group text-left"
+                className="bg-white border border-emerald-100 hover:border-emerald-300 backdrop-blur-sm p-5 rounded-xl transition-all duration-300 hover:shadow-lg group text-left"
               >
                 <div className={`bg-gradient-to-br ${link.color} p-3 rounded-lg w-12 h-12 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                   {link.icon}
                 </div>
-                <h3 className="font-medium text-lg mb-1">{link.title}</h3>
-                <p className="text-gray-400 text-sm">{link.description}</p>
+                <h3 className="font-medium text-lg mb-1 text-gray-800">{link.title}</h3>
+                <p className="text-gray-600 text-sm">{link.description}</p>
               </button>
             ))}
           </div>

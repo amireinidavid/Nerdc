@@ -258,6 +258,9 @@ export const profileAPI = {
   
   updateUser: (id: number, userData: any) => 
     api.put(`/profile/users/${id}`, userData),
+    
+  createUser: (userData: any) =>
+    api.post('/profile/users', userData),
 };
 
 // Journal API endpoints

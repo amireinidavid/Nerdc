@@ -322,7 +322,7 @@ const JournalReviewPage = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
       </div>
     );
   }
@@ -330,7 +330,7 @@ const JournalReviewPage = () => {
   if (error) {
     return (
       <div className="container max-w-4xl mx-auto py-8 px-4">
-        <Card className="border-red-300 bg-red-50 dark:bg-red-950/20">
+        <Card className="border-red-300 bg-red-50">
           <CardHeader>
             <CardTitle className="text-red-600">Error</CardTitle>
           </CardHeader>
@@ -366,20 +366,20 @@ const JournalReviewPage = () => {
   }
 
   return (
-    <div className="container max-w-6xl mx-auto py-8 px-4 relative">
+    <div className="container max-w-6xl mx-auto py-8 px-4 bg-gradient-to-b from-white to-emerald-50 min-h-screen text-gray-800 pt-20 pb-16 relative">
       {/* Subtle page-specific glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-purple-500/10 blur-3xl rounded-full pointer-events-none" aria-hidden="true" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-emerald-500/10 blur-3xl rounded-full pointer-events-none" aria-hidden="true" />
       
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 relative">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-purple-400 to-indigo-500 bg-clip-text text-transparent">Review Journal Submission</h1>
-          <p className="text-muted-foreground mt-1">Evaluate and provide feedback on this journal submission</p>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-800">Review Journal Submission</h1>
+          <p className="text-gray-600 mt-1">Evaluate and provide feedback on this journal submission</p>
         </div>
         <div className="mt-4 md:mt-0 space-x-2">
           <Button 
             variant="outline" 
             onClick={() => router.push('/admin/submissions')}
-            className="border-purple-500/20 hover:bg-purple-500/10"
+            className="border-emerald-300 hover:bg-emerald-50 text-gray-800"
           >
             Cancel
           </Button>
@@ -389,9 +389,9 @@ const JournalReviewPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
         {/* Journal Details Column */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border-purple-500/20 bg-card/70 backdrop-blur-sm">
+          <Card className="border-emerald-200 bg-white shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
+              <CardTitle className="flex items-center justify-between text-gray-800">
                 <span>Journal Details</span>
                 <Badge variant={
                   currentJournal.reviewStatus === "UNDER_REVIEW" ? "secondary" :
@@ -404,8 +404,8 @@ const JournalReviewPage = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <h3 className="text-xl font-semibold">{currentJournal.title}</h3>
-                <div className="flex flex-wrap items-center mt-2 text-sm text-muted-foreground">
+                <h3 className="text-xl font-semibold text-gray-800">{currentJournal.title}</h3>
+                <div className="flex flex-wrap items-center mt-2 text-sm text-gray-600">
                   <span>Submitted on {new Date(currentJournal.createdAt).toLocaleDateString()}</span>
                   <span className="mx-2 hidden sm:inline">•</span>
                   <span>Category: {currentJournal.category?.name || "Uncategorized"}</span>
@@ -413,46 +413,46 @@ const JournalReviewPage = () => {
               </div>
 
               <div>
-                <h4 className="font-medium mb-2 text-purple-300">Abstract</h4>
-                <p className="text-sm text-muted-foreground">{currentJournal.abstract}</p>
+                <h4 className="font-medium mb-2 text-emerald-700">Abstract</h4>
+                <p className="text-sm text-gray-600">{currentJournal.abstract}</p>
               </div>
 
               {currentJournal.content && (
                 <div>
-                  <h4 className="font-medium mb-2 text-purple-300">Content</h4>
-                  <div className="text-sm text-muted-foreground max-h-64 overflow-y-auto border border-purple-500/20 rounded-md p-3 bg-background/40">
+                  <h4 className="font-medium mb-2 text-emerald-700">Content</h4>
+                  <div className="text-sm text-gray-600 max-h-64 overflow-y-auto border border-emerald-200 rounded-md p-3 bg-emerald-50/50">
                     {currentJournal.content}
                   </div>
                 </div>
               )}
 
               <div>
-                <h4 className="font-medium mb-2 text-purple-300">Author Information</h4>
+                <h4 className="font-medium mb-2 text-emerald-700">Author Information</h4>
                 <div className="flex items-center">
                   {currentJournal.author?.profileImage ? (
                     <img 
                       src={currentJournal.author.profileImage} 
                       alt={currentJournal.author.name} 
-                      className="w-10 h-10 rounded-full mr-3 border border-purple-500/30"
+                      className="w-10 h-10 rounded-full mr-3 border border-emerald-200"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3 border border-purple-500/30">
+                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mr-3 border border-emerald-200">
                       {currentJournal.author?.name?.charAt(0) || 'A'}
                     </div>
                   )}
                   <div>
-                    <p className="font-medium">{currentJournal.author?.name}</p>
-                    <p className="text-sm text-muted-foreground">{currentJournal.author?.institution || 'No institution provided'}</p>
+                    <p className="font-medium text-gray-800">{currentJournal.author?.name}</p>
+                    <p className="text-sm text-gray-600">{currentJournal.author?.institution || 'No institution provided'}</p>
                   </div>
                 </div>
               </div>
 
               {currentJournal.tags && currentJournal.tags.length > 0 && (
                 <div>
-                  <h4 className="font-medium mb-2 text-purple-300">Tags</h4>
+                  <h4 className="font-medium mb-2 text-emerald-700">Tags</h4>
                   <div className="flex flex-wrap gap-2">
                     {currentJournal.tags.map((tagItem) => (
-                      <Badge key={tagItem.tag.id} variant="outline" className="border-purple-500/30 bg-purple-500/10">
+                      <Badge key={tagItem.tag.id} variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
                         {tagItem.tag.name}
                       </Badge>
                     ))}
@@ -462,26 +462,26 @@ const JournalReviewPage = () => {
 
               {currentJournal.doi && (
                 <div>
-                  <h4 className="font-medium mb-1 text-purple-300">DOI</h4>
-                  <p className="text-sm text-muted-foreground">{currentJournal.doi}</p>
+                  <h4 className="font-medium mb-1 text-emerald-700">DOI</h4>
+                  <p className="text-sm text-gray-600">{currentJournal.doi}</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* PDF Document Card */}
-          <Card className="border-purple-500/20 bg-card/70 backdrop-blur-sm">
+          <Card className="border-emerald-200 bg-white shadow-sm">
             <CardHeader>
-              <CardTitle>Journal Document</CardTitle>
+              <CardTitle className="text-gray-800">Journal Document</CardTitle>
               <CardDescription>Review the submitted PDF document</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {!currentJournal.pdfUrl ? (
-                <div className="rounded-md border border-dashed border-purple-500/30 p-8 text-center bg-background/40">
+                <div className="rounded-md border border-dashed border-emerald-300 p-8 text-center bg-emerald-50/50">
                   <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-10 w-10 text-purple-400 mb-4"
+                      className="h-10 w-10 text-emerald-500 mb-4"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -493,8 +493,8 @@ const JournalReviewPage = () => {
                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                       />
                     </svg>
-                    <h3 className="text-lg font-semibold">No PDF Document</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800">No PDF Document</h3>
+                    <p className="text-sm text-gray-600 mb-4">
                       This submission does not include a PDF document
                     </p>
                   </div>
@@ -506,7 +506,7 @@ const JournalReviewPage = () => {
                       variant="outline" 
                       size="sm"
                       onClick={() => setShowPDFPreview(false)}
-                      className="border-purple-500/20 hover:bg-purple-500/10"
+                      className="border-emerald-200 hover:bg-emerald-50 text-gray-800"
                     >
                       Hide Preview
                     </Button>
@@ -518,7 +518,7 @@ const JournalReviewPage = () => {
                         `${currentJournal.title.replace(/\s+/g, '-')}.pdf`
                       )}
                       disabled={isDownloading}
-                      className="bg-purple-600 hover:bg-purple-700"
+                      className="bg-emerald-600 hover:bg-emerald-700"
                     >
                       {isDownloading ? (
                         <>
@@ -546,16 +546,16 @@ const JournalReviewPage = () => {
                       )}
                     </Button>
                   </div>
-                  <div className="border border-purple-500/20 rounded-lg overflow-hidden">
+                  <div className="border border-emerald-200 rounded-lg overflow-hidden">
                     <PDFViewer url={currentJournal.pdfUrl} />
                   </div>
                 </div>
               ) : (
-                <div className="rounded-md border border-dashed border-purple-500/30 p-8 text-center bg-background/40">
+                <div className="rounded-md border border-dashed border-emerald-300 p-8 text-center bg-emerald-50/50">
                   <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-10 w-10 text-purple-400 mb-4"
+                      className="h-10 w-10 text-emerald-500 mb-4"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -567,14 +567,14 @@ const JournalReviewPage = () => {
                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                       />
                     </svg>
-                    <h3 className="text-lg font-semibold">Document Preview</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800">Document Preview</h3>
+                    <p className="text-sm text-gray-600 mb-4">
                       Click the button below to preview the document or download it for review
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3">
                       <Button 
                         onClick={() => setShowPDFPreview(true)}
-                        className="bg-purple-600 hover:bg-purple-700"
+                        className="bg-emerald-600 hover:bg-emerald-700"
                       >
                         Preview PDF
                       </Button>
@@ -585,7 +585,7 @@ const JournalReviewPage = () => {
                           `${currentJournal.title.replace(/\s+/g, '-')}.pdf`
                         )}
                         disabled={isDownloading}
-                        className="border-purple-500/30 hover:bg-purple-500/10"
+                        className="border-emerald-300 hover:bg-emerald-50 text-gray-800"
                       >
                         {isDownloading ? (
                           <>
@@ -606,9 +606,9 @@ const JournalReviewPage = () => {
 
         {/* Review Form Column */}
         <div className="space-y-6">
-          <Card className="border-purple-500/20 bg-card/70 backdrop-blur-sm sticky top-4">
+          <Card className="border-emerald-200 bg-white shadow-sm sticky top-4">
             <CardHeader>
-              <CardTitle>Review Decision</CardTitle>
+              <CardTitle className="text-gray-800">Review Decision</CardTitle>
               <CardDescription>
                 Provide your decision and feedback for this journal submission
               </CardDescription>
@@ -621,23 +621,23 @@ const JournalReviewPage = () => {
                     name="reviewStatus"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-purple-300">Review Status</FormLabel>
+                        <FormLabel className="text-emerald-700">Review Status</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="border-purple-500/30 bg-background/40">
+                            <SelectTrigger className="border-emerald-200 bg-white">
                               <SelectValue placeholder="Select a status" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="bg-card border-purple-500/30">
+                          <SelectContent className="bg-white border-emerald-200">
                             <SelectItem value={ReviewStatus.APPROVED}>Approve</SelectItem>
                             <SelectItem value={ReviewStatus.REJECTED}>Reject</SelectItem>
                             <SelectItem value={ReviewStatus.PUBLISHED}>Publish</SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormDescription>
+                        <FormDescription className="text-gray-500">
                           Choose the appropriate status for this journal submission
                         </FormDescription>
                         <FormMessage />
@@ -650,15 +650,15 @@ const JournalReviewPage = () => {
                     name="reviewNotes"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-purple-300">Review Notes</FormLabel>
+                        <FormLabel className="text-emerald-700">Review Notes</FormLabel>
                         <FormControl>
                           <Textarea
                             placeholder="Provide feedback to the author..."
-                            className="min-h-[120px] border-purple-500/30 bg-background/40 resize-y"
+                            className="min-h-[120px] border-emerald-200 bg-white resize-y"
                             {...field}
                           />
                         </FormControl>
-                        <FormDescription>
+                        <FormDescription className="text-gray-500">
                           These notes will be shared with the author
                         </FormDescription>
                         <FormMessage />
@@ -671,16 +671,16 @@ const JournalReviewPage = () => {
                     name="price"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-purple-300">Price (₦)</FormLabel>
+                        <FormLabel className="text-emerald-700">Price (₦)</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
                               ₦
                             </span>
                             <Input
                               type="number"
                               placeholder="0.00"
-                              className="pl-8 border-purple-500/30 bg-background/40"
+                              className="pl-8 border-emerald-200 bg-white"
                               {...field}
                               value={field.value === null ? '' : field.value}
                               onChange={(e) => {
@@ -690,7 +690,7 @@ const JournalReviewPage = () => {
                             />
                           </div>
                         </FormControl>
-                        <FormDescription>
+                        <FormDescription className="text-gray-500">
                           Set the price for this journal in Naira (₦) - required if publishing
                         </FormDescription>
                         <FormMessage />
@@ -700,7 +700,7 @@ const JournalReviewPage = () => {
 
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (

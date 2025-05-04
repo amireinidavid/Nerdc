@@ -72,6 +72,7 @@ interface ProfileState {
   getUsers: (params?: AdminUserListParams) => Promise<void>;
   getUserById: (id: number) => Promise<ProfileUser | null>;
   updateUser: (id: number, userData: any) => Promise<void>;
+  createUser: (userData: any) => Promise<ProfileUser | null>;
   
   // Utilities
   clearError: () => void;
@@ -267,6 +268,30 @@ const useProfileStore = create<ProfileState>()((set, get) => ({
       set({ 
         isLoading: false, 
         error: error.response?.data?.message || 'Failed to update user' 
+      });
+      throw error;
+    }
+  },
+  
+  // Admin: Create a new user
+  createUser: async (userData: any) => {
+    try {
+      set({ isLoading: true, error: null });
+      
+      const response = await profileAPI.createUser(userData);
+      const newUser = response.data.data;
+      
+      // Update the users list with the new user
+      set(state => ({
+        users: [newUser, ...state.users],
+        isLoading: false
+      }));
+      
+      return newUser;
+    } catch (error: any) {
+      set({ 
+        isLoading: false, 
+        error: error.response?.data?.message || 'Failed to create user' 
       });
       throw error;
     }

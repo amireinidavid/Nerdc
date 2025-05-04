@@ -7,7 +7,8 @@ import {
   toggleResearcherStatus,
   getAllUsers,
   getUserById,
-  adminUpdateUser
+  adminUpdateUser,
+  createUser
 } from "../controllers/profileController";
 import { authorizeRoles } from "../middleware/authorizationMiddleware";
 import { UserRole } from "../generated/prisma";
@@ -24,5 +25,6 @@ router.put("/toggle-researcher", authenticateUser, toggleResearcherStatus);
 router.get("/users", authenticateUser, authorizeRoles([UserRole.ADMIN]), getAllUsers);
 router.get("/users/:id", authenticateUser, authorizeRoles([UserRole.ADMIN]), getUserById);
 router.put("/users/:id", authenticateUser, authorizeRoles([UserRole.ADMIN]), adminUpdateUser);
+router.post("/users", authenticateUser, authorizeRoles([UserRole.ADMIN]), createUser);
 
 export default router; 

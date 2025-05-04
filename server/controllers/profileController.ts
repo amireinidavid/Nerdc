@@ -574,3 +574,125 @@ export const adminUpdateUser = async (req: Request, res: Response) => {
     });
   }
 };
+
+/**
+ * Admin endpoint to create a new user
+ */
+export const createUser = async (req: Request, res: Response) => {
+  try {
+    const adminId = req.user?.id;
+    const adminRole = req.user?.role;
+
+    if (!adminId || adminRole !== UserRole.ADMIN) {
+      res.status(403).json({
+        success: false,
+        message: "Forbidden: Only admins can access this endpoint",
+      });
+      return;
+    }
+
+    const {
+      name,
+      email,
+      password,
+      role,
+      profileStatus,
+      institution,
+      department,
+      position,
+      phone,
+      country,
+      state,
+      city,
+      // Additional fields optional
+    } = req.body;
+
+    // Basic validation
+    if (!name || !email || !password || !role) {
+      res.status(400).json({
+        success: false,
+        message: "Name, email, password, and role are required",
+      });
+      return;
+    }
+
+    // Check if email already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      res.status(400).json({
+        success: false,
+        message: "Email already in use",
+      });
+      return;
+    }
+
+    // Validate role
+    if (!Object.values(UserRole).includes(role)) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid role specified",
+      });
+      return;
+    }
+
+    // Validate profile status
+    const validStatuses = ["INCOMPLETE", "COMPLETE"];
+    if (profileStatus && !validStatuses.includes(profileStatus)) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid profile status specified",
+      });
+      return;
+    }
+
+    // Additional validation for author role
+    if (role === UserRole.AUTHOR && (!institution || !department || !position)) {
+      res.status(400).json({
+        success: false,
+        message: "Institution, department, and position are required for authors",
+      });
+      return;
+    }
+
+    // Import bcrypt for password hashing
+    const bcrypt = require('bcrypt');
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create the new user
+    const newUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role,
+        profileStatus: profileStatus || "INCOMPLETE",
+        institution,
+        department,
+        position,
+        phone,
+        country,
+        state,
+        city,
+      },
+    });
+
+    // Return created user without password
+    const { password: _, ...userWithoutPassword } = newUser;
+
+    res.status(201).json({
+      success: true,
+      message: "User created successfully",
+      data: userWithoutPassword,
+    });
+  } catch (error) {
+    console.error("Create user error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error creating user",
+      error: (error as Error).message,
+    });
+  }
+};

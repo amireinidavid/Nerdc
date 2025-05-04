@@ -20,7 +20,6 @@ const userLinks = [
 const adminLinks = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/submissions", label: "Submissions" },
-  { href: "/admin/upload-assessed", label: "Upload Assessed" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/published", label: "Published" },
   { href: "/admin/settings", label: "Settings" },

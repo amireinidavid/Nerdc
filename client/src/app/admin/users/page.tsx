@@ -145,7 +145,7 @@ const AdminUserPage = () => {
     isLoading, 
     error, 
     getUsers, 
-    updateUser,
+    updateUser, 
     createUser,
     clearError 
   } = useProfileStore();
@@ -854,7 +854,7 @@ const AdminUserPage = () => {
                   </FormItem>
                 )}
               />
-
+              
               <FormField
                 control={createForm.control}
                 name="password"

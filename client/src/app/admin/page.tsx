@@ -111,13 +111,25 @@ const AdminPage = () => {
 
   // Placeholder data in case API doesn't return all needed values
   const stats = {
-    totalJournals: journalStats?.totalJournals || 0,
-    pendingSubmissions: journalStats?.pendingSubmissions || 0,
-    recentSubmissions: journalStats?.recentSubmissions || 0,
-    approvedSubmissions: journalStats?.approvedSubmissions || 0,
-    rejectedSubmissions: journalStats?.rejectedSubmissions || 0,
-    contributorsCount: journalStats?.contributorsCount || 0,
-    publishedThisMonth: journalStats?.publishedThisMonth || 0,
+    totalJournals: journalStats?.journals?.totalJournals || 0,
+    pendingSubmissions: (journalStats?.journals?.statusCounts?.find((s: any) => s.reviewStatus === 'UNDER_REVIEW')?._count || 0),
+    recentSubmissions: journalStats?.journals?.recentSubmissions || 0,
+    approvedSubmissions: (journalStats?.journals?.statusCounts?.find((s: any) => s.reviewStatus === 'PUBLISHED')?._count || 0),
+    rejectedSubmissions: (journalStats?.journals?.statusCounts?.find((s: any) => s.reviewStatus === 'REJECTED')?._count || 0),
+    contributorsCount: journalStats?.users?.totalAuthors || 0,
+    publishedThisMonth: journalStats?.journals?.publishedJournals || 0,
+    totalUsers: journalStats?.users?.totalUsers || 0,
+    totalAuthors: journalStats?.users?.totalAuthors || 0, 
+    totalRegularUsers: journalStats?.users?.totalRegularUsers || 0,
+    totalAdmins: journalStats?.users?.totalAdmins || 0,
+    newUsers: journalStats?.users?.newUsers || 0,
+    activeAuthorsCount: journalStats?.users?.activeAuthorsCount || 0,
+    totalDownloads: journalStats?.engagement?.totalDownloads || 0,
+    totalComments: journalStats?.engagement?.totalComments || 0,
+    categoriesCount: journalStats?.engagement?.categoriesWithJournalsCount || 0,
+    mostViewed: journalStats?.mostViewed || [],
+    mostDownloaded: journalStats?.mostDownloaded || [],
+    topAuthors: journalStats?.topAuthors || [],
   };
 
   return (
@@ -144,7 +156,7 @@ const AdminPage = () => {
                   </div>
                   <div className="bg-emerald-50 p-2 rounded-lg">
                     <p className="text-xs text-emerald-600">Published</p>
-                    <p className="text-xl font-semibold text-gray-800">{isLoading ? "..." : stats.publishedThisMonth}</p>
+                    <p className="text-xl font-semibold text-gray-800">{isLoading ? "..." : stats.approvedSubmissions}</p>
                   </div>
                   <div className="bg-red-50 p-2 rounded-lg">
                     <p className="text-xs text-red-600">Rejected</p>
@@ -175,7 +187,7 @@ const AdminPage = () => {
           {/* Published This Month */}
           <div className="bg-white rounded-xl p-6 shadow-md border border-emerald-100 hover:border-emerald-300 transition-all">
             <div className="flex items-start justify-between">
-    <div>
+              <div>
                 <p className="text-gray-600 font-medium mb-1">Published This Month</p>
                 <h2 className="text-3xl font-bold text-gray-800">{isLoading ? "..." : stats.publishedThisMonth}</h2>
                 <p className="text-gray-600 mt-4 text-sm">New journals published in the current month</p>
@@ -184,6 +196,147 @@ const AdminPage = () => {
                 <JournalsIcon />
               </div>
             </div>
+          </div>
+          
+          {/* Engagement Card */}
+          <div className="bg-white rounded-xl p-6 shadow-md border border-emerald-100 hover:border-emerald-300 transition-all">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-gray-600 font-medium mb-1">Engagement</p>
+                <h2 className="text-3xl font-bold text-gray-800">{isLoading ? "..." : stats.totalDownloads}</h2>
+                <div className="grid grid-cols-2 gap-2 mt-4">
+                  <div className="bg-blue-50 p-2 rounded-lg">
+                    <p className="text-xs text-blue-600">Comments</p>
+                    <p className="text-xl font-semibold text-gray-800">{isLoading ? "..." : stats.totalComments}</p>
+                  </div>
+                  <div className="bg-purple-50 p-2 rounded-lg">
+                    <p className="text-xs text-purple-600">Categories</p>
+                    <p className="text-xl font-semibold text-gray-800">{isLoading ? "..." : stats.categoriesCount}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-3 bg-blue-100 text-blue-600 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                  <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                  <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          {/* User Statistics Card */}
+          <div className="bg-white rounded-xl p-6 shadow-md border border-emerald-100 hover:border-emerald-300 transition-all">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-gray-600 font-medium mb-1">User Statistics</p>
+                <h2 className="text-3xl font-bold text-gray-800">{isLoading ? "..." : stats.totalUsers}</h2>
+                <div className="grid grid-cols-3 gap-2 mt-4">
+                  <div className="bg-indigo-50 p-2 rounded-lg">
+                    <p className="text-xs text-indigo-600">Authors</p>
+                    <p className="text-xl font-semibold text-gray-800">{isLoading ? "..." : stats.totalAuthors}</p>
+                  </div>
+                  <div className="bg-pink-50 p-2 rounded-lg">
+                    <p className="text-xs text-pink-600">Regular</p>
+                    <p className="text-xl font-semibold text-gray-800">{isLoading ? "..." : stats.totalRegularUsers}</p>
+                  </div>
+                  <div className="bg-yellow-50 p-2 rounded-lg">
+                    <p className="text-xs text-yellow-600">New</p>
+                    <p className="text-xl font-semibold text-gray-800">{isLoading ? "..." : stats.newUsers}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-3 bg-indigo-100 text-indigo-600 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          {/* Active Authors Card */}
+          <div className="bg-white rounded-xl p-6 shadow-md border border-emerald-100 hover:border-emerald-300 transition-all">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-gray-600 font-medium mb-1">Active Authors</p>
+                <h2 className="text-3xl font-bold text-gray-800">{isLoading ? "..." : stats.activeAuthorsCount}</h2>
+                <p className="text-gray-600 mt-4 text-sm">Authors who have published at least one article</p>
+              </div>
+              <div className="p-3 bg-green-100 text-green-600 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                  <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Top Authors and Popular Content */}
+        <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10 transition-all duration-700 delay-200 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          {/* Top Authors */}
+          <div className="bg-white rounded-xl p-6 shadow-md border border-emerald-100">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Top Authors</h2>
+            {isLoading ? (
+              <div className="flex justify-center p-4">Loading...</div>
+            ) : (
+              <div className="space-y-4">
+                {stats.topAuthors.slice(0, 5).map((author: any, index: number) => (
+                  <div key={author.id} className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-800 font-bold">
+                        {index + 1}
+                      </div>
+                      <div className="ml-4">
+                        <h3 className="text-base font-medium text-gray-800">{author.name || "Anonymous"}</h3>
+                        <p className="text-sm text-gray-500">{author.institution || "No institution"}</p>
+                      </div>
+                    </div>
+                    <div className="bg-emerald-50 px-3 py-1 rounded-full text-emerald-700">
+                      {author.publicationCount} publications
+                    </div>
+                  </div>
+                ))}
+                {stats.topAuthors.length === 0 && (
+                  <div className="text-center py-4 text-gray-500">No author data available</div>
+                )}
+              </div>
+            )}
+          </div>
+          
+          {/* Most Viewed Content */}
+          <div className="bg-white rounded-xl p-6 shadow-md border border-emerald-100">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Most Viewed Content</h2>
+            {isLoading ? (
+              <div className="flex justify-center p-4">Loading...</div>
+            ) : (
+              <div className="space-y-4">
+                {stats.mostViewed.slice(0, 5).map((journal: any, index: number) => (
+                  <div key={journal.id} className="flex items-start justify-between">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-800 font-bold">
+                        {index + 1}
+                      </div>
+                      <div className="ml-4">
+                        <h3 className="text-base font-medium text-gray-800">{journal.title.length > 40 ? `${journal.title.substring(0, 40)}...` : journal.title}</h3>
+                        <p className="text-sm text-gray-500">By {journal.author?.name || "Anonymous"}</p>
+                      </div>
+                    </div>
+                    <div className="bg-blue-50 px-3 py-1 rounded-full text-blue-700 flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-1">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                      {journal.viewCount}
+                    </div>
+                  </div>
+                ))}
+                {stats.mostViewed.length === 0 && (
+                  <div className="text-center py-4 text-gray-500">No view data available</div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

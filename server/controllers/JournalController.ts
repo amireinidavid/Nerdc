@@ -1492,6 +1492,56 @@ export const getJournalStats = async (req: Request, res: Response):Promise<void>
     // Get total downloads
     const totalDownloads = await prisma.download.count();
 
+    // Get user statistics
+    const totalUsers = await prisma.user.count();
+    
+    // Get authors (users with AUTHOR role)
+    const totalAuthors = await prisma.user.count({
+      where: { role: UserRole.AUTHOR }
+    });
+    
+    // Get admin users
+    const totalAdmins = await prisma.user.count({
+      where: { role: UserRole.ADMIN }
+    });
+    
+    // Get regular users
+    const totalRegularUsers = await prisma.user.count({
+      where: { role: UserRole.USER }
+    });
+    
+    // Get new users in the last 30 days
+    const newUsers = await prisma.user.count({
+      where: {
+        createdAt: {
+          gte: new Date(new Date().setDate(new Date().getDate() - 30)),
+        },
+      },
+    });
+    
+    // Get active authors (authors who have published at least one journal)
+    const activeAuthors = await prisma.journal.groupBy({
+      by: ['authorId'],
+      _count: {
+        id: true
+      },
+      where: {
+        isPublished: true
+      }
+    });
+    
+    // Count comments
+    const totalComments = await prisma.comment.count();
+    
+    // Count categories with journals
+    const categoriesWithJournalsCount = await prisma.category.count({
+      where: {
+        journals: {
+          some: {}
+        }
+      }
+    });
+
     // Get most viewed journals
     const mostViewed = await prisma.journal.findMany({
       where: { isPublished: true },
@@ -1512,6 +1562,34 @@ export const getJournalStats = async (req: Request, res: Response):Promise<void>
         },
       },
     });
+    
+    // Get most downloaded journals
+    const mostDownloaded = await prisma.journal.findMany({
+      where: { isPublished: true },
+      take: 5,
+      orderBy: {
+        downloads: {
+          _count: 'desc'
+        }
+      },
+      select: {
+        id: true,
+        title: true,
+        viewCount: true,
+        _count: {
+          select: { 
+            downloads: true,
+            comments: true
+          }
+        },
+        author: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
 
     // Get recent submissions
     const recentSubmissions = await prisma.journal.count({
@@ -1521,16 +1599,75 @@ export const getJournalStats = async (req: Request, res: Response):Promise<void>
         },
       },
     });
+    
+    // Get top authors by counting their journals
+    const authorJournalCounts = await prisma.journal.groupBy({
+      by: ['authorId'],
+      _count: {
+        id: true
+      },
+      where: {
+        isPublished: true
+      },
+      orderBy: {
+        _count: {
+          id: 'desc'
+        }
+      },
+      take: 5
+    });
+    
+    // Fetch author details for the top authors
+    const authorIds = authorJournalCounts.map(a => a.authorId);
+    const authorsDetails = await prisma.user.findMany({
+      where: {
+        id: {
+          in: authorIds
+        }
+      },
+      select: {
+        id: true,
+        name: true,
+        institution: true
+      }
+    });
+    
+    // Combine the counts with the author details
+    const topAuthors = authorJournalCounts.map(authorCount => {
+      const authorDetail = authorsDetails.find(a => a.id === authorCount.authorId);
+      return {
+        id: authorCount.authorId,
+        name: authorDetail?.name || 'Unknown',
+        institution: authorDetail?.institution || null,
+        publicationCount: authorCount._count.id
+      };
+    });
 
      res.status(200).json({
       success: true,
       data: {
-        totalJournals,
-        publishedJournals,
-        totalDownloads,
-        statusCounts,
+        journals: {
+          totalJournals,
+          publishedJournals,
+          statusCounts,
+          recentSubmissions,
+        },
+        users: {
+          totalUsers,
+          totalAuthors,
+          totalRegularUsers,
+          totalAdmins,
+          newUsers,
+          activeAuthorsCount: activeAuthors.length
+        },
+        engagement: {
+          totalDownloads,
+          totalComments,
+          categoriesWithJournalsCount
+        },
         mostViewed,
-        recentSubmissions,
+        mostDownloaded,
+        topAuthors
       },
     });
   } catch (error) {

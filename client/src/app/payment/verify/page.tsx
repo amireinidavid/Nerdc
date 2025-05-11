@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -15,26 +15,29 @@ const PaymentVerificationPage = () => {
   const [paymentInfo, setPaymentInfo] = useState<any>(null);
   
   useEffect(() => {
-    // Retrieve the payment information from session storage
-    const storedInfo = sessionStorage.getItem('remitaCheckoutInfo');
-    if (storedInfo) {
-      setPaymentInfo(JSON.parse(storedInfo));
+    if (!searchParams) return;
+    
+    if (typeof window !== 'undefined') {
+      const storedInfo = sessionStorage.getItem('remitaCheckoutInfo');
+      if (storedInfo) {
+        try {
+          setPaymentInfo(JSON.parse(storedInfo));
+        } catch (e) {
+          console.error('Failed to parse payment info:', e);
+        }
+      }
     }
     
-    // Check URL parameters for RRR or status
-    const rrr = searchParams?.get('RRR') || searchParams?.get('rrr');
-    const statusParam = searchParams?.get('status') || '';
+    const rrr = searchParams.get('RRR') || searchParams.get('rrr');
+    const statusParam = searchParams.get('status') || '';
     
     if (rrr) {
-      // If we have an RRR number, we can consider it a success
-      // In a real implementation, you would verify with your backend
       setPaymentStatus('success');
     } else if (statusParam.toLowerCase() === 'failed' || statusParam.toLowerCase() === 'error') {
       setPaymentStatus('failed');
     } else if (statusParam.toLowerCase() === 'pending') {
       setPaymentStatus('pending');
     } else {
-      // No clear indication, but user came back from payment
       setPaymentStatus('unknown');
     }
     

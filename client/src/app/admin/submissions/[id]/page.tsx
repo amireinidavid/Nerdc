@@ -147,9 +147,8 @@ const PDFViewer = ({ url }: { url: string }) => {
 // Form schema
 const reviewFormSchema = z.object({
   reviewStatus: z.enum([
-    ReviewStatus.APPROVED,
-    ReviewStatus.REJECTED,
     ReviewStatus.PUBLISHED,
+    ReviewStatus.REJECTED,
   ]),
   reviewNotes: z.string().optional(),
   price: z.coerce.number()
@@ -167,7 +166,7 @@ const JournalReviewPage = () => {
   const { 
     currentJournal,
     fetchJournalById,
-    reviewJournal,
+    reviewJournalWithNotification,
     isLoading,
     isSubmitting,
     error,
@@ -186,7 +185,7 @@ const JournalReviewPage = () => {
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewFormSchema),
     defaultValues: {
-      reviewStatus: ReviewStatus.APPROVED,
+      reviewStatus: ReviewStatus.PUBLISHED,
       reviewNotes: "",
       price: 10000,
     },
@@ -299,23 +298,31 @@ const JournalReviewPage = () => {
     if (!currentJournal) return;
 
     try {
-      // Convert price to appropriate format for backend
+      // Process form values
       const processedValues = {
         ...values,
-        // Set price to 10000 for all submissions
-        price: 10000,
         isPublished: values.reviewStatus === ReviewStatus.PUBLISHED,
       };
 
-      const result = await reviewJournal(currentJournal.id, processedValues);
+      // Use the new function that includes email notification
+      const result = await reviewJournalWithNotification(currentJournal.id, processedValues);
       
-      if (result) {
-        toast.success(`Journal has been ${values.reviewStatus.toLowerCase()}`);
-        router.push('/admin/submissions');
+      if (result.success) {
+        // Show success message with notification detail
+        if (processedValues.isPublished) {
+          toast.success("Journal published successfully! Email notification sent to the author.");
+        } else {
+          toast.success("Journal review completed successfully.");
+        }
+        
+        // Redirect to submissions page
+        router.push("/admin/submissions");
+      } else {
+        toast.error(result.error || "Failed to review journal");
       }
     } catch (error) {
-      console.error('Error submitting review:', error);
-      toast.error('Failed to submit review');
+      console.error("Error reviewing journal:", error);
+      toast.error("An error occurred while reviewing the journal");
     }
   };
 
@@ -632,9 +639,8 @@ const JournalReviewPage = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="bg-white border-emerald-200">
-                            <SelectItem value={ReviewStatus.APPROVED}>Approve</SelectItem>
+                          <SelectItem value={ReviewStatus.PUBLISHED}>Publish</SelectItem>
                             <SelectItem value={ReviewStatus.REJECTED}>Reject</SelectItem>
-                            <SelectItem value={ReviewStatus.PUBLISHED}>Publish</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormDescription className="text-gray-500">

@@ -378,17 +378,17 @@ const JournalDetailsPage = () => {
             {/* Action Buttons */}
             <div className="md:col-span-1 flex flex-col md:items-end gap-2">
               <div className="flex gap-2 w-full md:w-auto">
-                <Button 
+              <Button 
                   onClick={hasPurchased ? handleDownload : handleAddToCart} 
                   className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
-                  size="lg"
+                size="lg"
                   disabled={isCartSubmitting || isDownloading}
-                >
+              >
                   {isCartSubmitting || isDownloading ? (
                     <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : hasPurchased ? (
                     <>
-                      <Download className="h-5 w-5" />
+                <Download className="h-5 w-5" />
                       Download PDF
                     </>
                   ) : (
@@ -410,7 +410,7 @@ const JournalDetailsPage = () => {
                       Add to Cart <span className="font-semibold">₦10,000</span>
                     </>
                   )}
-                </Button>
+              </Button>
               </div>
               
               <div className="flex gap-2 self-end">
@@ -668,7 +668,7 @@ const JournalDetailsPage = () => {
                 
                 <CardFooter className="px-5 py-4 border-t border-emerald-100 bg-emerald-50">
                   <div className="flex flex-col gap-2 w-full">
-                    <Button 
+                  <Button 
                       onClick={hasPurchased ? handleDownload : handleAddToCart} 
                       className={`w-full gap-2 ${hasPurchased 
                         ? 'bg-emerald-700 hover:bg-emerald-800' 
@@ -676,13 +676,13 @@ const JournalDetailsPage = () => {
                       disabled={isCartSubmitting || isDownloading}
                     >
                       {isCartSubmitting || isDownloading ? (
-                        <>
-                          <div className="h-4 w-4 mr-2 animate-spin border-2 border-white border-t-transparent rounded-full" />
+                      <>
+                        <div className="h-4 w-4 mr-2 animate-spin border-2 border-white border-t-transparent rounded-full" />
                           {isDownloading ? `${downloadProgress}%` : 'Processing...'}
-                        </>
+                      </>
                       ) : hasPurchased ? (
-                        <>
-                          <Download className="h-5 w-5" />
+                      <>
+                    <Download className="h-5 w-5" />
                           Download PDF
                         </>
                       ) : (
@@ -702,9 +702,9 @@ const JournalDetailsPage = () => {
                             />
                           </svg>
                           Add to Cart • ₦10,000
-                        </>
-                      )}
-                    </Button>
+                      </>
+                    )}
+                  </Button>
                   </div>
                 </CardFooter>
               </Card>

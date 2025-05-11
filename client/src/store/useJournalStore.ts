@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { journalAPI } from '@/utils/api';
+import { sendJournalPublishedNotification } from "@/utils/emailService";
 
 // Journal types
 export interface Journal {
@@ -123,6 +124,7 @@ interface JournalState {
   fetchJournalStats: () => Promise<void>;
   clearErrors: () => void;
   resetCurrentJournal: () => void;
+  reviewJournalWithNotification: (journalId: number, reviewData: any) => Promise<{ success: boolean; data: Journal | null; error?: string }>;
 }
 
 const defaultPagination = {
@@ -493,6 +495,82 @@ const useJournalStore = create<JournalState>()(
         // Utility functions
         clearErrors: () => set({ error: null }),
         resetCurrentJournal: () => set({ currentJournal: null }),
+        
+        /**
+         * Review and update a journal's status, sending email notification if published
+         * @param journalId - The ID of the journal to review
+         * @param reviewData - The review data (status, notes, etc.)
+         * @returns Promise with the result of the review operation
+         */
+        reviewJournalWithNotification: async (journalId: number, reviewData: any) => {
+          set({ isSubmitting: true, error: null });
+          try {
+            // Use the existing API method instead of manual fetch with incorrect URL
+            const response = await journalAPI.reviewJournal(journalId, reviewData);
+            const data = response.data;
+
+            if (!data.success) {
+              throw new Error(data.message || "Failed to review journal");
+            }
+
+            set({ isSubmitting: false });
+            
+            // If the journal was published, send an email notification
+            if (
+              reviewData.reviewStatus === "PUBLISHED" ||
+              (reviewData.isPublished && reviewData.reviewStatus)
+            ) {
+              const journal = data.data;
+              
+              console.log("Journal author data:", journal?.author);
+              
+              // Check if we have author information needed for the notification
+              if (journal?.author) {
+                // Log the exact author data we're working with
+                console.log("Author email data:", {
+                  email: journal.author.email,
+                  name: journal.author.name,
+                  emailType: typeof journal.author.email,
+                  nameType: typeof journal.author.name
+                });
+                
+                if (journal.author.email && typeof journal.author.email === 'string' && journal.author.email.trim() !== '') {
+                  try {
+                    const emailResult = await sendJournalPublishedNotification(
+                      journal.author.email,
+                      journal.author.name || 'Author',
+                      journal.title || 'Your Journal',
+                      journal.id
+                    );
+                    
+                    if (!emailResult.success) {
+                      console.warn(`Email notification failed: ${emailResult.error}`);
+                      // You might want to display this error in your UI
+                    } else {
+                      console.log("Email notification sent successfully");
+                    }
+                  } catch (emailError) {
+                    console.error("Failed to send email notification:", emailError);
+                    // Continue with the journal review process even if email fails
+                  }
+                } else {
+                  console.warn("Could not send publication notification: Invalid or missing author email", journal.author.email);
+                }
+              } else {
+                console.warn("Could not send publication notification: Author information is completely missing");
+              }
+            }
+
+            return { success: true, data: data.data as Journal };
+          } catch (error) {
+            console.error("Error reviewing journal:", error);
+            set({
+              isSubmitting: false,
+              error: error instanceof Error ? error.message : "Failed to review journal",
+            });
+            return { success: false, data: null, error: error instanceof Error ? error.message : String(error) };
+          }
+        },
       }),
       {
         name: 'journal-store',

@@ -1,65 +1,296 @@
-# File Upload Configuration
+🧠 Global System Features (All Users)
+🧩 Core Architecture
+Modular Monorepo structure (e.g., TurboRepo or Nx)
 
-This project supports two methods for file uploads:
+Folder separation: /users, /vendors, /admins
 
-1. **Local File Storage** (default, works without additional setup)
-2. **UploadThing** (cloud storage, requires API credentials)
+Type-safe backend with tRPC or Next.js App Router + API routes
 
-## Local File Storage
+Server Actions (if using Next.js 15+)
 
-The local file storage solution is enabled by default and requires no additional setup. Files are stored in the `uploads/` directory in your project root.
+SSR + ISR + Static optimization hybrid
 
-## Setting Up UploadThing
+Edge deployment support (Vercel, Cloudflare)
 
-To use UploadThing for cloud file uploads, follow these steps:
+AI-augmented search & recommendation
 
-1. **Create an UploadThing account**:
-   - Go to [https://uploadthing.com](https://uploadthing.com) and sign up
-   - Create a new project
+Multi-language and currency support (i18n + currency switch)
 
-2. **Get your API credentials**:
-   - In your UploadThing dashboard, navigate to the API Keys section
-   - Copy your App ID and Secret Key
+Accessibility (WCAG-compliant)
 
-3. **Set environment variables**:
-   Create a `.env` file in your project root with the following:
+Fully mobile responsive with PWA capabilities
 
-   ```
-   # UploadThing credentials
-   UPLOADTHING_APP_ID=your_app_id_here
-   UPLOADTHING_SECRET=your_secret_key_here
-   
-   # Public URL for file access (set this to your domain in production)
-   PUBLIC_URL=http://localhost:3000
-   ```
+Component library with shadcn/ui or custom Tailwind components
 
-4. **Install required packages**:
-   ```bash
-   npm install uploadthing @uploadthing/react
-   ```
+Real-time capabilities via WebSockets / Socket.io / Ably
 
-5. **Restart your server**:
-   The application will automatically detect the UploadThing credentials and use cloud storage.
+Microservices-ready backend (optional)
 
-## File Upload Configuration Files
+👤 Users / Clients
+🔐 Auth & Profiles
+Sign up with Email, Social logins (Google, Apple, Facebook)
 
-- `server/utils/fileStorage.ts`: Local file storage implementation
-- `server/utils/uploadThingConfig.ts`: UploadThing cloud storage implementation
+OTP or biometric-based login (e.g., Passkeys/WebAuthn)
 
-## Usage in Your Code
+Multi-device login management
 
-Both implementations provide the same interface, so you can import and use either one:
+Saved addresses and delivery preferences
 
-```typescript
-// Import from fileStorage for local storage
-import { uploadDocument, uploadThumbnail, getSecureUrl } from "../utils/fileStorage";
+Wishlist & Favorites
 
-// OR import from uploadThingConfig for cloud storage
-import { uploadDocument, uploadThumbnail, getSecureUrl } from "../utils/uploadThingConfig";
-```
+Notifications (Email, Push, In-app)
 
-## Important Note
+Account settings (Profile pic, name, password, etc.)
 
-If you plan to use UploadThing in production, make sure to add proper authentication and security measures by customizing the middleware functions in the `uploadThingConfig.ts` file. 
+🛒 Shopping Experience
+Intelligent search with AI autocomplete & suggestions
 
-Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+Voice search and smart filters
+
+Rich product listings with 3D previews (Three.js or model viewer)
+
+Variants (size, color, stock)
+
+Discounts, coupons, and flash sales
+
+Cart & Save-for-later system
+
+Shipping calculator
+
+Product comparison
+
+Auto-fill checkout with saved info
+
+💳 Orders & Payments
+One-click checkout (Shopify-like experience)
+
+Multiple payment gateways (Stripe, PayPal, crypto, etc.)
+
+Wallet & reward system
+
+Split payments (for multi-vendor orders)
+
+Order tracking with real-time logistics status
+
+Order cancellation, refunds, and returns
+
+⭐ Reviews & Community
+Product reviews with images/videos
+
+Q&A section under products
+
+Like and upvote reviews
+
+Follow favorite vendors
+
+Community points for engagement
+
+🛍️ Vendors
+🏪 Storefront Management
+Customizable vendor storefront (URL, logo, banner, etc.)
+
+Product creation (with categories, tags, variants, pricing)
+
+Rich text editor with Markdown/WYSIWYG support
+
+Bulk product uploads (CSV/Excel)
+
+Inventory & stock management
+
+Pricing rules (discounts, bundle offers)
+
+📦 Order Fulfillment
+Receive orders with real-time notifications
+
+Set processing time, delivery time
+
+Print shipping labels and invoices
+
+Status updates (packed, shipped, delivered)
+
+💰 Earnings & Analytics
+Real-time earnings dashboard
+
+Commission tracking
+
+Withdraw earnings (bank, PayPal, etc.)
+
+Sales heatmaps, trending products, conversion rates
+
+Refund management
+
+🧾 Invoices & Reports
+Auto-generated invoices
+
+Monthly sales/export reports
+
+Tax reports (GST, VAT, etc.)
+
+📢 Marketing & Engagement
+Send vendor-specific offers to followers
+
+Create coupons for their store/products
+
+Vendor newsletters
+
+Ad placements on homepage (paid promotion)
+
+🛠️ Admins
+🧑‍💻 User & Vendor Management
+View, edit, ban, or verify users & vendors
+
+Vendor onboarding & verification (manual or KYC automation)
+
+Role-based access control (sub-admins, managers)
+
+📦 Product & Category Oversight
+Approve/reject vendor products (optional)
+
+Category and tag management
+
+Global discount campaigns
+
+💳 Orders, Returns, and Payments
+See all orders & transactions
+
+Manage refund requests and disputes
+
+Admin override on orders
+
+📊 Analytics & Insights
+Platform-level metrics (GMV, MAU, conversion rates, etc.)
+
+Vendor performance monitoring
+
+Category-wise sales
+
+Failed payment logs
+
+Fraud detection alerts
+
+🏦 Financial Management
+Platform commission settings per vendor/category
+
+Payment reconciliation
+
+Tax & compliance management
+
+🛡️ Moderation & Security
+Content moderation tools (AI moderation optional)
+
+Fraud detection & blacklisting
+
+IP/device blacklisting
+
+Audit logs
+
+🧠 AI & Automation
+AI-driven product categorization
+
+Smart recommendation engine
+
+Predictive analytics for trends
+
+Auto-suggest product tags, titles
+
+🎨 Other Next-Gen UX Enhancements
+✨ Animated UI (Framer Motion)
+
+🌙 Dark/light theme toggle with system detection
+
+🧵 Customizable UI themes for vendors
+
+🪄 AI-generated product descriptions for vendors (OpenAI API)
+
+📷 AI-powered image enhancement or background removal
+
+📦 AR view for selected products (WebAR or 3D preview)
+
+🗺️ Smart delivery ETA prediction (ML models)
+
+🔎 Visual Search (upload an image to find similar products)
+
+🛎️ Live chat with vendor (via socket or AI bot fallback)
+
+🛡️ Anti-fraud & anti-bot measures (hCaptcha, BotD)
+
+🔩 Dev & Infra Extras (For Future Scalability)
+CI/CD via GitHub Actions or Vercel pipelines
+
+Docker + Kubernetes (optional)
+
+Redis for caching sessions & performance
+
+Background jobs with BullMQ or Redis queues
+
+Database: PostgreSQL with Prisma
+
+File Uploads: Cloudinary or S3
+
+Error Monitoring: Sentry / LogRocket
+
+SEO-optimized with schema.org metadata
+
+Sitemap & RSS feed generation
+
+API rate limiting & abuse detection
+
+nextgen-ecommerce/
+├── user/                 # Client-side app for regular users/shoppers
+│   ├── app/              # Next.js App Router pages for users
+│   ├── components/       # Shared UI components (Navbar, Footer, etc.)
+│   ├── features/         # Feature modules (Cart, Product, Auth, etc.)
+│   ├── hooks/            # React hooks
+│   ├── lib/              # Client-side helpers (formatting, API utils)
+│   ├── public/           # Static assets
+│   ├── styles/           # Tailwind config, globals, themes
+│   └── types/            # TypeScript types specific to user
+│
+├── vendor/              # Vendor dashboard & storefront management
+│   ├── app/
+│   ├── components/
+│   ├── features/         # Products, Orders, Analytics, etc.
+│   ├── hooks/
+│   ├── lib/
+│   ├── public/
+│   ├── styles/
+│   └── types/
+│
+├── admin/               # Admin dashboard (CMS, analytics, moderation)
+│   ├── app/
+│   ├── components/
+│   ├── features/         # VendorManagement, Moderation, Analytics, etc.
+│   ├── hooks/
+│   ├── lib/
+│   ├── public/
+│   ├── styles/
+│   └── types/
+│
+├── backend/             # Express.js + Prisma API layer
+│   ├── prisma/           # Schema & migrations
+│   │   ├── schema.prisma
+│   │   └── seed.ts
+│   ├── src/
+│   │   ├── controllers/   # Business logic for routes
+│   │   ├── middleware/    # Auth, error handling, rate limiter
+│   │   ├── routes/        # Express route definitions (users, vendors, admin)
+│   │   ├── services/      # Services (email, payments, cloud uploads)
+│   │   ├── utils/         # JWT, helpers, validators
+│   │   ├── jobs/          # Background jobs (queues, cron)
+│   │   ├── config/        # App config, env, db, cors, etc.
+│   │   └── index.ts       # Main Express entry
+│   ├── uploads/           # Temp storage (if not using cloud)
+│   ├── .env
+│   └── package.json
+│
+├── shared/              # Shared code across frontend and backend
+│   ├── constants/        # App-wide constants (roles, statuses, etc.)
+│   ├── types/            # Universal TS types/interfaces
+│   ├── validators/       # Zod schemas, validation logic
+│   ├── utils/            # Reusable logic
+│   └── config/           # Shared config (API base, theme, etc.)
+│
+├── .gitignore
+├── package.json         # Root workspace config (Yarn/NPM workspaces or Turborepo)
+├── turbo.json           # If using Turborepo
+└── README.md
